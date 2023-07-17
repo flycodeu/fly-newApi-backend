@@ -1057,76 +1057,79 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
     <table id="310" parent="12" name="interface_info">
       <Comment>接口信息</Comment>
     </table>
-    <table id="311" parent="12" name="post">
+    <table id="311" parent="12" name="interface_info_new">
+      <Comment>接口信息</Comment>
+    </table>
+    <table id="312" parent="12" name="post">
       <Comment>帖子</Comment>
     </table>
-    <table id="312" parent="12" name="user">
+    <table id="313" parent="12" name="user">
       <Comment>用户</Comment>
     </table>
-    <table id="313" parent="12" name="user_interface_info">
+    <table id="314" parent="12" name="user_interface_info">
       <Comment>用户调用接口关系表</Comment>
     </table>
-    <column id="314" parent="310" name="id">
+    <column id="315" parent="310" name="id">
       <Position>1</Position>
       <Comment>主键</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>null</SequenceIdentity>
     </column>
-    <column id="315" parent="310" name="name">
+    <column id="316" parent="310" name="name">
       <Position>2</Position>
       <Comment>名称</Comment>
       <DataType>varchar(256)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="316" parent="310" name="description">
+    <column id="317" parent="310" name="description">
       <Position>3</Position>
       <Comment>描述</Comment>
       <DataType>varchar(256)|0s</DataType>
     </column>
-    <column id="317" parent="310" name="url">
+    <column id="318" parent="310" name="url">
       <Position>4</Position>
       <Comment>接口地址</Comment>
       <DataType>varchar(512)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="318" parent="310" name="requestHeader">
+    <column id="319" parent="310" name="requestHeader">
       <Position>5</Position>
       <Comment>请求头</Comment>
       <DataType>text|0s</DataType>
     </column>
-    <column id="319" parent="310" name="responseHeader">
+    <column id="320" parent="310" name="responseHeader">
       <Position>6</Position>
       <Comment>响应头</Comment>
       <DataType>text|0s</DataType>
     </column>
-    <column id="320" parent="310" name="status">
+    <column id="321" parent="310" name="status">
       <Position>7</Position>
       <Comment>接口状态（0-关闭，1-开启）</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="321" parent="310" name="method">
+    <column id="322" parent="310" name="method">
       <Position>8</Position>
       <Comment>请求类型</Comment>
       <DataType>varchar(256)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="322" parent="310" name="userId">
+    <column id="323" parent="310" name="userId">
       <Position>9</Position>
       <Comment>创建人</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="323" parent="310" name="createTime">
+    <column id="324" parent="310" name="createTime">
       <Position>10</Position>
       <Comment>创建时间</Comment>
       <DataType>datetime|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <column id="324" parent="310" name="updateTime">
+    <column id="325" parent="310" name="updateTime">
       <Position>11</Position>
       <Comment>更新时间</Comment>
       <DataType>datetime|0s</DataType>
@@ -1134,117 +1137,215 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="325" parent="310" name="isDeleted">
+    <column id="326" parent="310" name="isDeleted">
       <Position>12</Position>
       <Comment>是否删除(0-未删, 1-已删)</Comment>
       <DataType>tinyint|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="326" parent="310" name="requestParams">
+    <column id="327" parent="310" name="requestParams">
       <Position>13</Position>
       <Comment>请求参数</Comment>
       <DataType>text|0s</DataType>
     </column>
-    <key id="327" parent="310" name="PRIMARY">
+    <key id="328" parent="310" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="328" parent="311" name="id">
+    <column id="329" parent="311" name="id">
+      <Position>1</Position>
+      <Comment>主键</Comment>
+      <DataType>bigint|0s</DataType>
+      <NotNull>1</NotNull>
+      <SequenceIdentity>null</SequenceIdentity>
+    </column>
+    <column id="330" parent="311" name="name">
+      <Position>2</Position>
+      <Comment>接口名称</Comment>
+      <DataType>varchar(256)|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="331" parent="311" name="description">
+      <Position>3</Position>
+      <Comment>接口描述</Comment>
+      <DataType>varchar(256)|0s</DataType>
+    </column>
+    <column id="332" parent="311" name="port">
+      <Position>4</Position>
+      <Comment>端口号</Comment>
+      <DataType>int|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="333" parent="311" name="IPAddress">
+      <Position>5</Position>
+      <Comment>Ip地址</Comment>
+      <DataType>varchar(128)|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>&apos;localhost&apos;</DefaultExpression>
+    </column>
+    <column id="334" parent="311" name="url">
+      <Position>6</Position>
+      <Comment>接口地址url</Comment>
+      <DataType>varchar(512)|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="335" parent="311" name="requestHeader">
+      <Position>7</Position>
+      <Comment>请求头</Comment>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="336" parent="311" name="responseHeader">
+      <Position>8</Position>
+      <Comment>响应头</Comment>
+      <DataType>text|0s</DataType>
+    </column>
+    <column id="337" parent="311" name="status">
+      <Position>9</Position>
+      <Comment>接口状态（0-关闭，1-开启）</Comment>
+      <DataType>int|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>0</DefaultExpression>
+    </column>
+    <column id="338" parent="311" name="method">
+      <Position>10</Position>
+      <Comment>请求类型</Comment>
+      <DataType>varchar(256)|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="339" parent="311" name="userId">
+      <Position>11</Position>
+      <Comment>创建人</Comment>
+      <DataType>bigint|0s</DataType>
+      <NotNull>1</NotNull>
+    </column>
+    <column id="340" parent="311" name="createTime">
+      <Position>12</Position>
+      <Comment>创建时间</Comment>
+      <DataType>datetime|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+    </column>
+    <column id="341" parent="311" name="updateTime">
+      <Position>13</Position>
+      <Comment>更新时间</Comment>
+      <DataType>datetime|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
+      <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
+    </column>
+    <column id="342" parent="311" name="isDeleted">
+      <Position>14</Position>
+      <Comment>是否删除(0-未删, 1-已删)</Comment>
+      <DataType>tinyint|0s</DataType>
+      <NotNull>1</NotNull>
+      <DefaultExpression>0</DefaultExpression>
+    </column>
+    <column id="343" parent="311" name="requestParams">
+      <Position>15</Position>
+      <Comment>请求参数</Comment>
+      <DataType>text|0s</DataType>
+    </column>
+    <key id="344" parent="311" name="PRIMARY">
+      <NameSurrogate>1</NameSurrogate>
+      <ColNames>id</ColNames>
+      <Primary>1</Primary>
+    </key>
+    <column id="345" parent="312" name="id">
       <Position>1</Position>
       <Comment>id</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>null</SequenceIdentity>
     </column>
-    <column id="329" parent="311" name="age">
+    <column id="346" parent="312" name="age">
       <Position>2</Position>
       <Comment>年龄</Comment>
       <DataType>int|0s</DataType>
     </column>
-    <column id="330" parent="311" name="gender">
+    <column id="347" parent="312" name="gender">
       <Position>3</Position>
       <Comment>性别（0-男, 1-女）</Comment>
       <DataType>tinyint|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="331" parent="311" name="education">
+    <column id="348" parent="312" name="education">
       <Position>4</Position>
       <Comment>学历</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="332" parent="311" name="place">
+    <column id="349" parent="312" name="place">
       <Position>5</Position>
       <Comment>地点</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="333" parent="311" name="job">
+    <column id="350" parent="312" name="job">
       <Position>6</Position>
       <Comment>职业</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="334" parent="311" name="contact">
+    <column id="351" parent="312" name="contact">
       <Position>7</Position>
       <Comment>联系方式</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="335" parent="311" name="loveExp">
+    <column id="352" parent="312" name="loveExp">
       <Position>8</Position>
       <Comment>感情经历</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="336" parent="311" name="content">
+    <column id="353" parent="312" name="content">
       <Position>9</Position>
       <Comment>内容（个人介绍）</Comment>
       <DataType>text|0s</DataType>
     </column>
-    <column id="337" parent="311" name="photo">
+    <column id="354" parent="312" name="photo">
       <Position>10</Position>
       <Comment>照片地址</Comment>
       <DataType>varchar(1024)|0s</DataType>
     </column>
-    <column id="338" parent="311" name="reviewStatus">
+    <column id="355" parent="312" name="reviewStatus">
       <Position>11</Position>
       <Comment>状态（0-待审核, 1-通过, 2-拒绝）</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="339" parent="311" name="reviewMessage">
+    <column id="356" parent="312" name="reviewMessage">
       <Position>12</Position>
       <Comment>审核信息</Comment>
       <DataType>varchar(512)|0s</DataType>
     </column>
-    <column id="340" parent="311" name="viewNum">
+    <column id="357" parent="312" name="viewNum">
       <Position>13</Position>
       <Comment>浏览数</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="341" parent="311" name="thumbNum">
+    <column id="358" parent="312" name="thumbNum">
       <Position>14</Position>
       <Comment>点赞数</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="342" parent="311" name="userId">
+    <column id="359" parent="312" name="userId">
       <Position>15</Position>
       <Comment>创建用户 id</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="343" parent="311" name="createTime">
+    <column id="360" parent="312" name="createTime">
       <Position>16</Position>
       <Comment>创建时间</Comment>
       <DataType>datetime|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <column id="344" parent="311" name="updateTime">
+    <column id="361" parent="312" name="updateTime">
       <Position>17</Position>
       <Comment>更新时间</Comment>
       <DataType>datetime|0s</DataType>
@@ -1252,93 +1353,93 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="345" parent="311" name="isDelete">
+    <column id="362" parent="312" name="isDelete">
       <Position>18</Position>
       <Comment>是否删除</Comment>
       <DataType>tinyint|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <key id="346" parent="311" name="PRIMARY">
+    <key id="363" parent="312" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <column id="347" parent="312" name="id">
+    <column id="364" parent="313" name="id">
       <Position>1</Position>
       <Comment>id</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>null</SequenceIdentity>
     </column>
-    <column id="348" parent="312" name="userName">
+    <column id="365" parent="313" name="userName">
       <Position>2</Position>
       <Comment>用户昵称</Comment>
       <DataType>varchar(256)|0s</DataType>
     </column>
-    <column id="349" parent="312" name="userAccount">
+    <column id="366" parent="313" name="userAccount">
       <Position>3</Position>
       <Comment>账号</Comment>
       <DataType>varchar(256)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="350" parent="312" name="userAvatar">
+    <column id="367" parent="313" name="userAvatar">
       <Position>4</Position>
       <Comment>用户头像</Comment>
       <DataType>varchar(1024)|0s</DataType>
     </column>
-    <column id="351" parent="312" name="gender">
+    <column id="368" parent="313" name="gender">
       <Position>5</Position>
       <Comment>性别</Comment>
       <DataType>tinyint|0s</DataType>
     </column>
-    <column id="352" parent="312" name="userRole">
+    <column id="369" parent="313" name="userRole">
       <Position>6</Position>
       <Comment>用户角色：user / admin</Comment>
       <DataType>varchar(256)|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>&apos;user&apos;</DefaultExpression>
     </column>
-    <column id="353" parent="312" name="userPassword">
+    <column id="370" parent="313" name="userPassword">
       <Position>7</Position>
       <Comment>密码</Comment>
       <DataType>varchar(512)|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="354" parent="312" name="isDelete">
+    <column id="371" parent="313" name="isDelete">
       <Position>8</Position>
       <Comment>是否删除</Comment>
       <DataType>tinyint|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="355" parent="312" name="accessKey">
+    <column id="372" parent="313" name="accessKey">
       <Position>9</Position>
       <Comment>accessKey</Comment>
       <DataType>varchar(256)|0s</DataType>
     </column>
-    <column id="356" parent="312" name="secretKey">
+    <column id="373" parent="313" name="secretKey">
       <Position>10</Position>
       <Comment>secretKey</Comment>
       <DataType>varchar(256)|0s</DataType>
     </column>
-    <column id="357" parent="312" name="phoneNum">
+    <column id="374" parent="313" name="phoneNum">
       <Position>11</Position>
       <Comment>手机号码</Comment>
       <DataType>varchar(20)|0s</DataType>
     </column>
-    <column id="358" parent="312" name="email">
+    <column id="375" parent="313" name="email">
       <Position>12</Position>
       <Comment>个人邮箱</Comment>
       <DataType>varchar(100)|0s</DataType>
     </column>
-    <column id="359" parent="312" name="downloadCount">
+    <column id="376" parent="313" name="downloadCount">
       <Position>13</Position>
       <Comment>下载sk次数</Comment>
       <DataType>tinyint|0s</DataType>
       <DefaultExpression>2</DefaultExpression>
     </column>
-    <column id="360" parent="312" name="updateTime">
+    <column id="377" parent="313" name="updateTime">
       <Position>14</Position>
       <Comment>更新时间</Comment>
       <DataType>datetime|0s</DataType>
@@ -1346,75 +1447,75 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="361" parent="312" name="createTime">
+    <column id="378" parent="313" name="createTime">
       <Position>15</Position>
       <Comment>创建时间</Comment>
       <DataType>datetime|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <index id="362" parent="312" name="uni_userAccount">
+    <index id="379" parent="313" name="uni_userAccount">
       <ColNames>userAccount</ColNames>
       <Unique>1</Unique>
       <Type>btree</Type>
     </index>
-    <key id="363" parent="312" name="PRIMARY">
+    <key id="380" parent="313" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>
     </key>
-    <key id="364" parent="312" name="uni_userAccount">
+    <key id="381" parent="313" name="uni_userAccount">
       <ColNames>userAccount</ColNames>
       <UnderlyingIndexName>uni_userAccount</UnderlyingIndexName>
     </key>
-    <column id="365" parent="313" name="id">
+    <column id="382" parent="314" name="id">
       <Position>1</Position>
       <Comment>主键</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
       <SequenceIdentity>null</SequenceIdentity>
     </column>
-    <column id="366" parent="313" name="userId">
+    <column id="383" parent="314" name="userId">
       <Position>2</Position>
       <Comment>调用用户Id</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="367" parent="313" name="interfaceInfoId">
+    <column id="384" parent="314" name="interfaceInfoId">
       <Position>3</Position>
       <Comment>接口Id</Comment>
       <DataType>bigint|0s</DataType>
       <NotNull>1</NotNull>
     </column>
-    <column id="368" parent="313" name="totalNum">
+    <column id="385" parent="314" name="totalNum">
       <Position>4</Position>
       <Comment>总调用次数</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="369" parent="313" name="leftNum">
+    <column id="386" parent="314" name="leftNum">
       <Position>5</Position>
       <Comment>剩余调用次数</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="370" parent="313" name="status">
+    <column id="387" parent="314" name="status">
       <Position>6</Position>
       <Comment>0-正常 ，1-禁用</Comment>
       <DataType>int|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <column id="371" parent="313" name="createTime">
+    <column id="388" parent="314" name="createTime">
       <Position>7</Position>
       <Comment>创建时间</Comment>
       <DataType>datetime|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
     </column>
-    <column id="372" parent="313" name="updateTime">
+    <column id="389" parent="314" name="updateTime">
       <Position>8</Position>
       <Comment>更新时间</Comment>
       <DataType>datetime|0s</DataType>
@@ -1422,14 +1523,14 @@ sys|schema||mysql.sys|localhost|TRIGGER|G</Grants>
       <DefaultExpression>CURRENT_TIMESTAMP</DefaultExpression>
       <OnUpdate>CURRENT_TIMESTAMP</OnUpdate>
     </column>
-    <column id="373" parent="313" name="isDelete">
+    <column id="390" parent="314" name="isDelete">
       <Position>9</Position>
       <Comment>是否删除(0-未删, 1-已删)</Comment>
       <DataType>tinyint|0s</DataType>
       <NotNull>1</NotNull>
       <DefaultExpression>0</DefaultExpression>
     </column>
-    <key id="374" parent="313" name="PRIMARY">
+    <key id="391" parent="314" name="PRIMARY">
       <NameSurrogate>1</NameSurrogate>
       <ColNames>id</ColNames>
       <Primary>1</Primary>

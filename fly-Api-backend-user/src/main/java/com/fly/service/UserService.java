@@ -1,12 +1,17 @@
 package com.fly.service;
 
-import com.fly.model.entity.User;
+import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
+import com.fly.model.entity.User;
+import com.fly.model.request.DeleteRequest;
 import com.fly.model.request.User.UserAddRequest;
+import com.fly.model.request.User.UserQueryRequest;
+import com.fly.model.request.User.UserUpdateRequest;
 import com.fly.model.vo.LoginPhoneVo;
 import com.fly.model.vo.UserVO;
 
-import javax.servlet.http.HttpServletRequest;
+import java.util.List;
 
 /**
  * @author admin
@@ -31,7 +36,6 @@ public interface UserService extends IService<User> {
      *
      * @param userAccount  用户账户
      * @param userPassword 用户密码
-
      * @return 脱敏后的用户信息
      */
     String userLogin(String userAccount, String userPassword);
@@ -67,14 +71,63 @@ public interface UserService extends IService<User> {
 
     /**
      * 退出
+     *
      * @return
      */
     boolean logout();
 
     /**
      * 添加用户，管理员权限
+     *
      * @param userAddRequest
      * @return
      */
     Long addUser(UserAddRequest userAddRequest);
+
+    /**
+     * 删除用户
+     *
+     * @return
+     */
+    boolean deleteUser(DeleteRequest deleteRequest);
+
+    /**
+     * 更新用户信息
+     *
+     * @param userUpdateRequest
+     * @return
+     */
+    boolean updateUser(UserUpdateRequest userUpdateRequest);
+
+    /**
+     * 分页获取用户信息
+     *
+     * @param userQueryRequest
+     * @return
+     */
+    Page<UserVO> listPageUsers(UserQueryRequest userQueryRequest);
+
+    /**
+     * 查询条件
+     *
+     * @param userQueryRequest
+     * @return
+     */
+    QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest);
+
+    /**
+     * 脱敏列表
+     *
+     * @param userList
+     * @return
+     */
+    List<UserVO> getUserVO(List<User> userList);
+
+    /**
+     * 获取vo信息
+     *
+     * @param user
+     * @return
+     */
+    UserVO getUserVO(User user);
 }

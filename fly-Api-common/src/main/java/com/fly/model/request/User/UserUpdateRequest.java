@@ -1,17 +1,17 @@
-package com.fly.model.vo;
+package com.fly.model.request.User;
 
+import com.baomidou.mybatisplus.annotation.TableField;
 import lombok.Data;
 
 import java.io.Serializable;
-import java.util.Date;
 
 /**
- * 用户视图
+ * 用户更新请求
  *
- * @TableName user
+ * @author fly
  */
 @Data
-public class UserVO implements Serializable {
+public class UserUpdateRequest implements Serializable {
     /**
      * id
      */
@@ -43,18 +43,22 @@ public class UserVO implements Serializable {
     private String userRole;
 
     /**
-     * 创建时间
+     * 密码
      */
-    private Date createTime;
+    private String userPassword;
+
 
     /**
-     * 更新时间
+     * 手机号
      */
-    private Date updateTime;
-
     private String phoneNum;
 
+
+    /**
+     * 邮箱
+     */
     private String email;
 
+    @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 }

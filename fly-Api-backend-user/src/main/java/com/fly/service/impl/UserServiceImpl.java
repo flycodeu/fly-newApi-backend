@@ -3,21 +3,26 @@ package com.fly.service.impl;
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
+import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fly.common.ErrorCode;
+import com.fly.constant.CommonConstant;
 import com.fly.constant.LengthConstant;
 import com.fly.constant.UserConstant;
 import com.fly.exception.BusinessException;
 import com.fly.model.entity.User;
 import com.fly.model.enums.UserRoleEnum;
+import com.fly.model.request.DeleteRequest;
 import com.fly.model.request.User.UserAddRequest;
+import com.fly.model.request.User.UserQueryRequest;
+import com.fly.model.request.User.UserUpdateRequest;
 import com.fly.model.vo.LoginPhoneVo;
 import com.fly.model.vo.UserVO;
 import com.fly.service.UserService;
 import com.fly.mapper.UserMapper;
-import com.fly.utils.RedisConstants;
-import com.fly.utils.RegexUtils;
-import com.fly.utils.UserHolder;
+import com.fly.utils.*;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -26,10 +31,9 @@ import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
 import javax.servlet.http.HttpServletRequest;
-import java.util.Map;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 /**
  * @author admin
@@ -198,6 +202,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserVO userVO = BeanUtil.fillBeanWithMap(entries, new UserVO(), false);
         User user = new User();
         BeanUtils.copyProperties(userVO, user);
+
         return user;
     }
 
@@ -225,6 +230,129 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "添加用户失败");
         }
         return user.getId();
+    }
+
+    @Override
+    public boolean deleteUser(DeleteRequest deleteRequest) {
+        if (deleteRequest == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        Long id = deleteRequest.getId();
+        User user = this.getById(id);
+        if (user == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除对象为空");
+        }
+        boolean b = this.removeById(user);
+        if (!b) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "删除失败");
+        }
+        return true;
+    }
+
+    @Override
+    public boolean updateUser(UserUpdateRequest userUpdateRequest) {
+        String phonePattern = "^(?:(?:\\+|00)86)?1[3-9]\\d{9}$";
+        String emailPattern = "^([a-zA-Z\\d][\\w-]{2,})@(\\w{2,})\\.([a-z]{2,})(\\.[a-z]{2,})?$";
+        String phoneNum = userUpdateRequest.getPhoneNum();
+        String email = userUpdateRequest.getEmail();
+        String userName = userUpdateRequest.getUserName();
+
+        if (phoneNum != null) {
+            boolean matches = phoneNum.matches(phonePattern);
+            if (!matches) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "手机号格式错误");
+            }
+        }
+        if (email != null) {
+            boolean matches = email.matches(emailPattern);
+            if (!matches) {
+                throw new BusinessException(ErrorCode.PARAMS_ERROR, "邮箱格式错误");
+            }
+        }
+
+        User user = new User();
+        BeanUtils.copyProperties(userUpdateRequest, user);
+
+        return this.updateById(user);
+    }
+
+    @Override
+    public Page<UserVO> listPageUsers(UserQueryRequest userQueryRequest) {
+        long current = 1;
+        long size = 10;
+        User queryUser = new User();
+        if (userQueryRequest != null) {
+            BeanUtils.copyProperties(userQueryRequest, queryUser);
+            current = userQueryRequest.getCurrent();
+            size = userQueryRequest.getPageSize();
+        }
+        // 限制爬虫
+        ThrowUtils.throwIf(size > 20, ErrorCode.FORBIDDEN_ERROR, "禁止爬虫");
+
+        //模糊查询
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>(queryUser);
+
+        // 判断查询条件是否为空
+        if (userQueryRequest != null && (StringUtils.isNotBlank(userQueryRequest.getUserAccount())
+                || StringUtils.isNotBlank(userQueryRequest.getUserName()))) {
+            // 设置模糊查询条件
+            queryWrapper.and(wrapper -> wrapper
+                    .like(StringUtils.isNotBlank(userQueryRequest.getUserAccount()), "userAccount", userQueryRequest.getUserAccount())
+                    .like(StringUtils.isNotBlank(userQueryRequest.getUserName()), "userName", userQueryRequest.getUserName())
+            );
+        }
+
+        Page<User> userPage = this.page(new Page<>(current, size), queryWrapper);
+        Page<UserVO> voPage = new PageDTO<>(userPage.getCurrent(), userPage.getSize(), userPage.getTotal());
+        List<UserVO> userVoList = userPage.getRecords().stream().map(user -> {
+            UserVO userVo = new UserVO();
+            BeanUtils.copyProperties(user, userVo);
+            return userVo;
+        }).collect(Collectors.toList());
+        voPage.setRecords(userVoList);
+
+        return voPage;
+    }
+
+
+    @Override
+    public QueryWrapper<User> getQueryWrapper(UserQueryRequest userQueryRequest) {
+        if (userQueryRequest == null) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求参数为空");
+        }
+        Long id = userQueryRequest.getId();
+        String userName = userQueryRequest.getUserName();
+        String userRole = userQueryRequest.getUserRole();
+        String userAccount = userQueryRequest.getUserAccount();
+        String sortField = userQueryRequest.getSortField();
+        String sortOrder = userQueryRequest.getSortOrder();
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq(id != null, "id", id);
+        queryWrapper.eq(StringUtils.isNotBlank(userAccount), "userAccount", userAccount);
+        queryWrapper.eq(StringUtils.isNotBlank(userRole), "userRole", userRole);
+        queryWrapper.like(StringUtils.isNotBlank(userName), "userName", userName);
+        queryWrapper.orderBy(SqlUtils.validSortField(sortField), sortOrder.equals(CommonConstant.SORT_ORDER_ASC),
+                sortField);
+        return queryWrapper;
+    }
+
+
+    @Override
+    public List<UserVO> getUserVO(List<User> userList) {
+        if (CollectionUtils.isEmpty(userList)) {
+            return new ArrayList<>();
+        }
+        return userList.stream().map(this::getUserVO).collect(Collectors.toList());
+    }
+
+    @Override
+    public UserVO getUserVO(User user) {
+        if (user == null) {
+            return null;
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
     }
 
     /**

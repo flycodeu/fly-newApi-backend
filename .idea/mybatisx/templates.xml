@@ -69,8 +69,8 @@
             <option name="tableUIInfoList">
               <list>
                 <TableUIInfo>
-                  <option name="className" value="InterfaceInfo" />
-                  <option name="tableName" value="interface_info" />
+                  <option name="className" value="InterfaceInfoNew" />
+                  <option name="tableName" value="interface_info_new" />
                 </TableUIInfo>
               </list>
             </option>

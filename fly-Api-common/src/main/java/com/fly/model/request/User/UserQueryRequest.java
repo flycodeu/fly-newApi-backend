@@ -1,17 +1,20 @@
-package com.fly.model.vo;
+package com.fly.model.request.User;
 
+import com.fly.model.constant.PageRequest;
 import lombok.Data;
+import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
 import java.util.Date;
 
 /**
- * 用户视图
+ * 用户查询请求
  *
- * @TableName user
+ * @author flu
  */
+@EqualsAndHashCode(callSuper = true)
 @Data
-public class UserVO implements Serializable {
+public class UserQueryRequest extends PageRequest implements Serializable {
     /**
      * id
      */
@@ -51,10 +54,6 @@ public class UserVO implements Serializable {
      * 更新时间
      */
     private Date updateTime;
-
-    private String phoneNum;
-
-    private String email;
 
     private static final long serialVersionUID = 1L;
 }

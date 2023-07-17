@@ -2,6 +2,7 @@ package com.fly.mapper;
 
 import com.fly.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.fly.model.entity.InterfaceInfoNew;
 
 /**
 * @author admin
@@ -9,7 +10,7 @@ import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 * @createDate 2023-07-13 18:26:14
 * @Entity generator.domain.InterfaceInfo
 */
-public interface InterfaceInfoMapper extends BaseMapper<InterfaceInfo> {
+public interface InterfaceInfoMapper extends BaseMapper<InterfaceInfoNew> {
 
 }
 
