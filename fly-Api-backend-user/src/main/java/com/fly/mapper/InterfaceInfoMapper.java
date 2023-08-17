@@ -1,8 +1,7 @@
 package com.fly.mapper;
 
-import com.fly.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.fly.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.entity.InterfaceInfoNew;
 
 /**
 * @author admin

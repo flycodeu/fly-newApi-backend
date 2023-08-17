@@ -2,18 +2,19 @@ package com.fly.controller;
 
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fly.constant.UserConstant;
+import com.fly.exception.BusinessException;
+import com.fly.service.UserService;
+import com.flyCommon.model.request.User.*;
 import com.fly.annotation.AuthCheck;
 import com.fly.common.BaseResponse;
 import com.fly.common.ErrorCode;
 import com.fly.common.ResultUtils;
-import com.fly.constant.UserConstant;
-import com.fly.exception.BusinessException;
-import com.fly.model.entity.User;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.User.*;
-import com.fly.model.vo.LoginPhoneVo;
-import com.fly.model.vo.UserVO;
-import com.fly.service.UserService;
+import com.flyCommon.model.entity.User;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.vo.LoginPhoneVo;
+import com.flyCommon.model.vo.UserAKSKVo;
+import com.flyCommon.model.vo.UserVO;
 import com.fly.utils.ThrowUtils;
 import org.apache.ibatis.annotations.Param;
 import org.springframework.beans.BeanUtils;
@@ -28,8 +29,7 @@ import java.util.List;
 public class UserController {
     @Resource
     private UserService userService;
-    @Resource
-    private RedisTemplate<String, Object> redisTemplate;
+
 
     /**
      * 账号登录
@@ -111,8 +111,8 @@ public class UserController {
      * @return
      */
     @DeleteMapping( "/logout" )
-    public BaseResponse<Boolean> logout() {
-        boolean logout = userService.logout();
+    public BaseResponse<Boolean> logout(String token) {
+        boolean logout = userService.logout(token);
         return ResultUtils.success(logout);
     }
 
@@ -154,7 +154,8 @@ public class UserController {
 
     /**
      * 分页展示数据(管理员)
-     *这个方法模糊查询不起作用
+     * 这个方法模糊查询不起作用
+     *
      * @param userQueryRequest
      * @return
      */
@@ -167,11 +168,12 @@ public class UserController {
 
     /**
      * 分页查询数据，支持模糊查询
+     *
      * @param userQueryRequest
      * @return
      */
-    @PostMapping("/list/page/vo")
-    @AuthCheck(mustRole = UserConstant.ADMIN_ROLE)
+    @PostMapping( "/list/page/vo" )
+    @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
     public BaseResponse<Page<UserVO>> listUserVOByPage(@RequestBody UserQueryRequest userQueryRequest) {
         if (userQueryRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
@@ -187,5 +189,25 @@ public class UserController {
         return ResultUtils.success(userVOPage);
     }
 
+    /**
+     * 获取AK，sk
+     * @param userAKSKVo
+     * @return
+     */
+    @PostMapping( "/getClient" )
+    public BaseResponse<UserAKSKVo> getAkSkUser(@RequestBody UserAKSKVo userAKSKVo) {
+        UserAKSKVo userAkSkByToken = userService.getUserAkSkByToken(userAKSKVo);
+        return ResultUtils.success(userAkSkByToken);
+    }
 
+    /**
+     * 更新Ak，sk
+     * @param userAKSKVo
+     * @return
+     */
+    @PostMapping( "/updateClient" )
+    public BaseResponse<UserAKSKVo> updateAkSk(@RequestBody UserAKSKVo userAKSKVo) {
+        UserAKSKVo userAKSKVo1 = userService.updateUserAkSk(userAKSKVo);
+        return ResultUtils.success(userAKSKVo1);
+    }
 }

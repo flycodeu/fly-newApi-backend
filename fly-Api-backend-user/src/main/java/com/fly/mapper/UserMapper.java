@@ -1,6 +1,6 @@
 package com.fly.mapper;
 
-import com.fly.model.entity.User;
+import com.flyCommon.model.entity.User;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
 
 /**

@@ -1,13 +1,15 @@
 package com.fly.service;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.fly.model.entity.InterfaceInfo;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.fly.model.entity.InterfaceInfoNew;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.Interface.InterfaceInfoAddRequest;
-import com.fly.model.request.Interface.InterfaceInfoQueryRequest;
-import com.fly.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.request.IdRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
 
 import java.util.List;
 
@@ -24,10 +26,11 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
      * @param interfaceInfoAddRequest
      * @return
      */
-    Long addInterfaceInfo(InterfaceInfoAddRequest interfaceInfoAddRequest, String token);
+    Long addInterfaceInfo(InterfaceInfoAddRequest interfaceInfoAddRequest);
 
     /**
      * 删除接口
+     *
      * @param deleteRequest
      * @return
      */
@@ -43,6 +46,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 更新接口
+     *
      * @param interfaceInfoUpdateRequest
      * @return
      */
@@ -50,6 +54,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 查看单个接口
+     *
      * @param id
      * @return
      */
@@ -57,6 +62,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 列表展示接口
+     *
      * @param interfaceInfoQueryRequest
      * @return
      */
@@ -64,8 +70,33 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 分页获取接口
+     *
      * @param interfaceInfoQueryRequest
      * @return
      */
     Page<InterfaceInfoNew> getAllInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest);
+
+    /**
+     * 发布接口
+     * @param idRequest
+     * @return
+     */
+    Boolean onLineInterfaceInfo(IdRequest idRequest);
+
+    /**
+     * 下线接口
+     * @param idRequest
+     * @return
+     */
+    Boolean offLineInterfaceInfo(IdRequest idRequest);
+
+    /**
+     * 调用接口
+     * @param interfaceInfoInvokeRequest
+     * @return
+     */
+    Object invokeInterface(InterfaceInfoInvokeRequest interfaceInfoInvokeRequest);
+
+
+
 }

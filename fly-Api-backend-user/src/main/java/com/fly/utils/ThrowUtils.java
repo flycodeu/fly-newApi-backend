@@ -1,7 +1,7 @@
 package com.fly.utils;
 
-import com.fly.common.ErrorCode;
 import com.fly.exception.BusinessException;
+import com.fly.common.ErrorCode;
 
 /**
  * 抛异常工具类

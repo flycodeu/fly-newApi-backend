@@ -1,0 +1,30 @@
+spring:
+  application:
+    name: fly-interface
+#  mvc:
+#    pathmatch:
+#      matching-strategy: ant_path_matcher
+#  session:
+#    store-type: redis
+#    timeout: 86400
+
+server:
+  port: 7530
+  servlet:
+    context-path: /api
+
+
+flyapi:
+  client:
+    assess-key: fly
+    secret-key: abcdef
+
+
+yuapi:
+  client:
+    access-key: 1z3hn1rmyuzfs416pbj470ob5n31zzff
+    secret-key: 1wneq13du8tqcd0i72uawqs6nq9f2erx
+
+
+
+

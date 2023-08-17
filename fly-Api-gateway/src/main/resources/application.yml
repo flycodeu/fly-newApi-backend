@@ -1,0 +1,73 @@
+server:
+  port: 7550
+#  servlet:
+#    context-path: /api
+
+spring:
+  cloud:
+    gateway:
+      default-filters:
+        - AddResponseHeader=source,fly
+      routes:
+        - id: api_route
+          uri: http://localhost:7530
+          predicates:
+            - Path=/api/**
+        #        - id: after_route
+        #          uri: https://www.baidu.com
+        #          predicates:
+        #            - After=2023-07-29T17:42:47.789-07:00[Asia/Shanghai]
+        #        - id: before_route
+        #            uri: https://www.baidu.com
+        #            predicates:
+        #              - Before=2023-07-30T17:42:47.789-07:00[Asia/Shanghai]
+        #        - id: path_route
+        #          uri: https://www.baidu.com
+        #          predicates:
+        #            - Path=/api/**,
+#        - id: add_header
+#          uri: http://localhost:7530
+#          predicates:
+#            - Path= /api/name/**
+#          filters:
+#            - AddRequestHeader=fly,swag
+#            - AddRequestParameter=name, fly1
+#            - name: CircuitBreaker
+#              args:
+#                name: fetchIngredients
+#                fallbackUri: forward:/fallback
+#        - id: ingredients-fallback
+#          uri: https://www.baidu.com
+#          predicates:
+#            - Path= /fallback
+#        - id: requestratelimiter_route
+#            uri: https://www.baidu.com
+#            filters:
+#              - name: RequestRateLimiter
+#                args:
+#                  redis-rate-limiter.replenishRate: 10
+#                  redis-rate-limiter.burstCapacity: 20
+#                  redis-rate-limiter.requestedTokens: 1
+#        - id: nameRoot
+#            uri: http://localhost:7530
+#            predicates:
+#              - Path=/api/**
+#            filters:
+#              - StripPrefix=2
+
+logging:
+  level:
+    org:
+      springframework:
+        cloud:
+          gateway: trace
+
+dubbo:
+  application:
+    name: dubbo-api-platform-backend-provider
+  protocol:
+    name: dubbo
+    port: -1
+  registry:
+    id: nacos-registry
+    address: nacos://localhost:8848

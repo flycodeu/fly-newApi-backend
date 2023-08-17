@@ -17,6 +17,7 @@
 package com.fly.provider;
 
 
+import com.flyCommon.service.DemoService;
 import org.apache.dubbo.config.annotation.DubboService;
 import org.apache.dubbo.rpc.RpcContext;
 
@@ -33,6 +34,4 @@ public class DemoServiceImpl implements DemoService {
     public String sayHello2(String name) {
         return "fly";
     }
-
-
 }

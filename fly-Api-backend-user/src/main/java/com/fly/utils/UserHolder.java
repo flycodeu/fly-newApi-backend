@@ -1,7 +1,7 @@
 package com.fly.utils;
 
 
-import com.fly.model.vo.UserVO;
+import com.flyCommon.model.vo.UserVO;
 
 public class UserHolder {
     private static final ThreadLocal<UserVO> tl = new ThreadLocal<>();

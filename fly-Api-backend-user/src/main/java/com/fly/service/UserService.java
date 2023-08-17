@@ -3,13 +3,15 @@ package com.fly.service;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.IService;
-import com.fly.model.entity.User;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.User.UserAddRequest;
-import com.fly.model.request.User.UserQueryRequest;
-import com.fly.model.request.User.UserUpdateRequest;
-import com.fly.model.vo.LoginPhoneVo;
-import com.fly.model.vo.UserVO;
+import com.flyCommon.model.entity.User;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.request.User.UserAddRequest;
+import com.flyCommon.model.request.User.UserQueryRequest;
+import com.flyCommon.model.request.User.UserUpdateRequest;
+import com.flyCommon.model.vo.LoginEmailVo;
+import com.flyCommon.model.vo.LoginPhoneVo;
+import com.flyCommon.model.vo.UserAKSKVo;
+import com.flyCommon.model.vo.UserVO;
 
 import java.util.List;
 
@@ -48,6 +50,12 @@ public interface UserService extends IService<User> {
     String userLoginByPhone(LoginPhoneVo loginPhoneVo);
 
     /**
+     * 邮箱登录
+     * @param loginEmailVo
+     * @return
+     */
+    String userLoginByEmail(LoginEmailVo loginEmailVo);
+    /**
      * 发送验证码
      *
      * @return
@@ -74,7 +82,7 @@ public interface UserService extends IService<User> {
      *
      * @return
      */
-    boolean logout();
+    boolean logout(String token);
 
     /**
      * 添加用户，管理员权限
@@ -130,4 +138,17 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserVO getUserVO(User user);
+
+    /**
+     * 查看ak,sk
+     * @param userAKSKVo
+     * @return
+     */
+    UserAKSKVo getUserAkSkByToken(UserAKSKVo userAKSKVo);
+
+    /**
+     * 更新ak,sk
+     * @return
+     */
+    UserAKSKVo updateUserAkSk(UserAKSKVo userAKSKVo);
 }

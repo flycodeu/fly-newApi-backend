@@ -4,29 +4,34 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
-import com.fly.common.ErrorCode;
 import com.fly.constant.CommonConstant;
 import com.fly.exception.BusinessException;
-import com.fly.model.entity.InterfaceInfo;
-import com.fly.model.entity.InterfaceInfoNew;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.Interface.InterfaceInfoAddRequest;
-import com.fly.model.request.Interface.InterfaceInfoQueryRequest;
-import com.fly.model.request.Interface.InterfaceInfoUpdateRequest;
-import com.fly.model.vo.UserVO;
-import com.fly.service.InterfaceInfoService;
 import com.fly.mapper.InterfaceInfoMapper;
+import com.fly.service.InterfaceInfoService;
 import com.fly.service.UserService;
-import com.fly.utils.RegexUtils;
+import com.flyCommon.model.entity.UserInterfaceInfo;
+import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
+import com.flySdk.client.FlyApiClient;
+import com.fly.common.ErrorCode;
+import com.flyCommon.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.enums.InterfaceInfoStatusEnum;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.request.IdRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.vo.UserVO;
 import com.fly.utils.ThrowUtils;
+import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.net.InetAddress;
+import java.time.Duration;
 import java.util.List;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
@@ -42,12 +47,17 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
     @Resource
     private UserService userService;
+    @Resource
+    private FlyApiClient flyApiClient;
+    @Resource
+    private RedisTemplate<String, Object> redisTemplate;
 
     @Override
-    public Long addInterfaceInfo(InterfaceInfoAddRequest interfaceInfoAddRequest, String token) {
+    public Long addInterfaceInfo(InterfaceInfoAddRequest interfaceInfoAddRequest) {
         if (interfaceInfoAddRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请填写完整信息");
         }
+        String token = interfaceInfoAddRequest.getToken();
         InterfaceInfoNew interfaceInfoNew = new InterfaceInfoNew();
         BeanUtils.copyProperties(interfaceInfoAddRequest, interfaceInfoNew);
         this.validInterfaceInfo(interfaceInfoNew, true);
@@ -116,6 +126,18 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "ip地址不正确");
         }
 
+        if (interfaceInfo.getInvokeCount() > 1000) {
+            throw new BusinessException(ErrorCode.NO_AUTH_ERROR, "次数过多");
+        }
+
+        if (interfaceInfo.getInvokeCount() < 0) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "次数必须要为正值");
+        }
+//
+//        if (interfaceInfo.getPrice() < 0) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "价格必须是正值");
+//        }
+
     }
 
     @Override
@@ -124,7 +146,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
         }
         InterfaceInfoNew interfaceInfoNew = new InterfaceInfoNew();
-        BeanUtils.copyProperties(interfaceInfoNew, interfaceInfoNew);
+        BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfoNew);
         // 检验
         validInterfaceInfo(interfaceInfoNew, false);
         Long id = interfaceInfoNew.getId();
@@ -145,6 +167,8 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (byId == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
+
+
         return this.getById(id);
     }
 
@@ -161,24 +185,194 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
     @Override
     public Page<InterfaceInfoNew> getAllInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
-        if (interfaceInfoQueryRequest == null) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        //key
+        String cacheKey = generateCacheKey(interfaceInfoQueryRequest);
+
+        // Try to retrieve cached data from Redis
+        Page<InterfaceInfoNew> cachedData = getCachedData(cacheKey);
+        if (cachedData != null) {
+            return cachedData;
         }
-        InterfaceInfoNew interfaceInfoNew =new InterfaceInfoNew();
-        BeanUtils.copyProperties(interfaceInfoQueryRequest,interfaceInfoNew);
+
+        // If not cached, perform the database query
+        Page<InterfaceInfoNew> result = executeQuery(interfaceInfoQueryRequest);
+
+        // Cache the result in Redis
+        cacheData(cacheKey, result);
+
+        return result;
+    }
+
+    // 生成key
+    private String generateCacheKey(InterfaceInfoQueryRequest request) {
+        return "interface_info_cache:" + request.toString();
+    }
+    // 获取数据
+    private Page<InterfaceInfoNew> getCachedData(String cacheKey) {
+        return (Page<InterfaceInfoNew>) redisTemplate.opsForValue().get(cacheKey);
+    }
+    // 缓存数据
+    private void cacheData(String cacheKey, Page<InterfaceInfoNew> data) {
+
+        redisTemplate.opsForValue().set(cacheKey, data, Duration.ofMinutes(10)); // Set a suitable timeout
+    }
+
+    private Page<InterfaceInfoNew> executeQuery(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
         long pageSize = interfaceInfoQueryRequest.getPageSize();
         long current = interfaceInfoQueryRequest.getCurrent();
         String sortOrder = interfaceInfoQueryRequest.getSortOrder();
         String sortField = interfaceInfoQueryRequest.getSortField();
         String name = interfaceInfoQueryRequest.getName();
-        ThrowUtils.throwIf(pageSize>20,ErrorCode.FORBIDDEN_ERROR,"请勿爬虫");
-        QueryWrapper<InterfaceInfoNew> queryWrapper =new QueryWrapper<>(interfaceInfoNew);
-        queryWrapper.like("name",name);
+        Integer port = interfaceInfoQueryRequest.getPort();
+        Integer status = interfaceInfoQueryRequest.getStatus();
+        String method = interfaceInfoQueryRequest.getMethod();
+        String description = interfaceInfoQueryRequest.getDescription();
+
+        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
+        if (name != null) {
+            queryWrapper.like("name", name);
+        }
+        if (port != null) {
+            queryWrapper.eq("port", port);
+        }
+        if (status != null) {
+            queryWrapper.eq("status", status);
+        }
+        if (method != null) {
+            queryWrapper.like("method", method);
+        }
+        if (description != null) {
+            queryWrapper.like("description", description);
+        }
+
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         queryWrapper.orderByDesc("id");
         return this.page(new Page<>(current, pageSize), queryWrapper);
     }
+//    public Page<InterfaceInfoNew> getAllInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+//        if (interfaceInfoQueryRequest == null) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+//        }
+//
+//        InterfaceInfoNew interfaceInfoNew = new InterfaceInfoNew();
+//        BeanUtils.copyProperties(interfaceInfoQueryRequest, interfaceInfoNew);
+//        long pageSize = interfaceInfoQueryRequest.getPageSize();
+//        long current = interfaceInfoQueryRequest.getCurrent();
+//        String sortOrder = interfaceInfoQueryRequest.getSortOrder();
+//        String sortField = interfaceInfoQueryRequest.getSortField();
+//        String name = interfaceInfoQueryRequest.getName();
+//        Integer port = interfaceInfoQueryRequest.getPort();
+//        Integer status = interfaceInfoQueryRequest.getStatus();
+//        String method = interfaceInfoQueryRequest.getMethod();
+//        String description = interfaceInfoQueryRequest.getDescription();
+//        ThrowUtils.throwIf(pageSize > 20, ErrorCode.FORBIDDEN_ERROR, "请勿爬虫");
+//
+//        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
+//        if (name != null) {
+//            queryWrapper.like("name", name);
+//        }
+//        if (port != null) {
+//            queryWrapper.eq("port", port);
+//        }
+//        if (status != null) {
+//            queryWrapper.eq("status", status);
+//        }
+//        if (method != null) {
+//            queryWrapper.like("method", method);
+//        }
+//        if (description != null) {
+//            queryWrapper.like("description", description);
+//        }
+//
+//        queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
+//                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+//        queryWrapper.orderByDesc("id");
+//        return this.page(new Page<>(current, pageSize), queryWrapper);
+//    }
+
+    @Override
+    public Boolean onLineInterfaceInfo(IdRequest idRequest) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = idRequest.getId();
+        InterfaceInfoNew interfaceInfoNew = this.getById(id);
+        if (interfaceInfoNew == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // todo 判断是否可以调用
+        com.flySdk.model.User user = new com.flySdk.model.User();
+        user.setName("fly");
+        String res = flyApiClient.getNameByPostJson(user);
+        if (StringUtils.isBlank(res)) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+        // 修改上线
+        InterfaceInfoNew interfaceInfoNew1 = new InterfaceInfoNew();
+        interfaceInfoNew1.setId(id);
+        interfaceInfoNew1.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        boolean b = this.updateById(interfaceInfoNew1);
+        if (!b) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
+        }
+
+        return true;
+    }
+
+    @Override
+    public Boolean offLineInterfaceInfo(IdRequest idRequest) {
+        if (idRequest == null || idRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long id = idRequest.getId();
+        InterfaceInfoNew interfaceInfoNew = this.getById(id);
+        if (interfaceInfoNew == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        // 修改上线
+        InterfaceInfoNew interfaceInfoNew1 = new InterfaceInfoNew();
+        interfaceInfoNew1.setId(id);
+        interfaceInfoNew1.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        boolean b = this.updateById(interfaceInfoNew1);
+        if (!b) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
+        }
+
+        return true;
+    }
+
+    @Override
+    public Object invokeInterface(InterfaceInfoInvokeRequest interfaceInfoInvokeRequest) {
+        if (interfaceInfoInvokeRequest == null || interfaceInfoInvokeRequest.getId() <= 0) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        Long infoInvokeRequestId = interfaceInfoInvokeRequest.getId();
+        InterfaceInfoNew interfaceInfoNew = this.getById(infoInvokeRequestId);
+        if (interfaceInfoNew == null) {
+            throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
+        }
+        String requestParams = interfaceInfoInvokeRequest.getUserRequestParams();
+        Integer status = interfaceInfoNew.getStatus();
+        if (status == InterfaceInfoStatusEnum.OFFLINE.getValue()) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "接口已下线");
+        }
+        UserVO loginUserRedis = userService.getLoginUserRedis(interfaceInfoInvokeRequest.getToken());
+        if (loginUserRedis == null || loginUserRedis.getId() <= 0) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        com.flyCommon.model.entity.User user = userService.getById(loginUserRedis.getId());
+
+        String accessKey = user.getAccessKey();
+        String secretKey = user.getSecretKey();
+        FlyApiClient flyApiClient2 = new FlyApiClient(accessKey, secretKey);
+
+        Gson gson = new Gson();
+        com.flySdk.model.User fromJson = gson.fromJson(requestParams, com.flySdk.model.User.class);
+
+        return flyApiClient2.getNameByPostJson(fromJson);
+    }
+
 
     /**
      * 正则检验ip地址

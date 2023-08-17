@@ -1,7 +1,5 @@
 package com.fly.constant;
 
-import lombok.Data;
-
 /**
  * 主要是一些长度的确定
  */

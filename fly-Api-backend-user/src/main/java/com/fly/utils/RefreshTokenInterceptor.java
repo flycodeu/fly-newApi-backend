@@ -1,13 +1,9 @@
 package com.fly.utils;
 
 import cn.hutool.core.bean.BeanUtil;
-import com.fly.constant.UserConstant;
-import com.fly.model.entity.User;
-import com.fly.model.vo.UserVO;
+import com.flyCommon.model.vo.UserVO;
 import com.github.xiaoymin.knife4j.core.util.StrUtil;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.servlet.HandlerInterceptor;
 
 import javax.servlet.http.HttpServletRequest;

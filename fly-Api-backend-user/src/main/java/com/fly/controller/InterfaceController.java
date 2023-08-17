@@ -1,14 +1,19 @@
 package com.fly.controller;
 
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.fly.constant.UserConstant;
+import com.fly.service.InterfaceInfoService;
+import com.fly.annotation.AuthCheck;
 import com.fly.common.BaseResponse;
 import com.fly.common.ResultUtils;
-import com.fly.model.entity.InterfaceInfoNew;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.Interface.InterfaceInfoAddRequest;
-import com.fly.model.request.Interface.InterfaceInfoQueryRequest;
-import com.fly.model.request.Interface.InterfaceInfoUpdateRequest;
-import com.fly.service.InterfaceInfoService;
+import com.flyCommon.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.request.IdRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
+import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -25,12 +30,11 @@ public class InterfaceController {
      * 添加接口
      *
      * @param interfaceInfoAddRequest
-     * @param token
      * @return
      */
     @PostMapping( "/add" )
-    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest, String token) {
-        Long aLong = interfaceInfoService.addInterfaceInfo(interfaceInfoAddRequest, token);
+    public BaseResponse<Long> addInterfaceInfo(@RequestBody InterfaceInfoAddRequest interfaceInfoAddRequest) {
+        Long aLong = interfaceInfoService.addInterfaceInfo(interfaceInfoAddRequest);
         return ResultUtils.success(aLong);
     }
 
@@ -49,6 +53,7 @@ public class InterfaceController {
 
     /**
      * 更新接口
+     *
      * @param interfaceInfoUpdateRequest
      * @return
      */
@@ -60,6 +65,7 @@ public class InterfaceController {
 
     /**
      * 获取接口
+     *
      * @param id
      * @return
      */
@@ -72,11 +78,12 @@ public class InterfaceController {
 
     /**
      * 接口列表
+     *
      * @param interfaceInfoQueryRequest
      * @return
      */
     @GetMapping( "/interface/list" )
-    public BaseResponse<List<InterfaceInfoNew>> getInterfaceInfoList(@RequestBody InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+    public BaseResponse<List<InterfaceInfoNew>> getInterfaceInfoList(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
         List<InterfaceInfoNew> allInterfaceInfoByList = interfaceInfoService.getAllInterfaceInfoByList(interfaceInfoQueryRequest);
         return ResultUtils.success(allInterfaceInfoByList);
     }
@@ -84,12 +91,53 @@ public class InterfaceController {
 
     /**
      * 接口分页
+     *
      * @param interfaceInfoQueryRequest
      * @return
      */
-    @GetMapping( "/interface/page" )
+    @PostMapping( "/interface/page" )
     public BaseResponse<Page<InterfaceInfoNew>> getInterfaceInfoPage(@RequestBody InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
         Page<InterfaceInfoNew> allInterfaceInfoByPage = interfaceInfoService.getAllInterfaceInfoByPage(interfaceInfoQueryRequest);
         return ResultUtils.success(allInterfaceInfoByPage);
     }
+
+    /**
+     * 管理员上线接口
+     *
+     * @param idRequest
+     * @return
+     */
+    @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
+    @PostMapping( "/onLine" )
+    public BaseResponse<Boolean> onLineInterfaceInfo(@RequestBody IdRequest idRequest) {
+        Boolean aBoolean = interfaceInfoService.onLineInterfaceInfo(idRequest);
+        return ResultUtils.success(aBoolean);
+    }
+
+    /**
+     * 管理员下线接口
+     *
+     * @param idRequest
+     * @return
+     */
+    @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
+    @PostMapping( "/downLine" )
+    public BaseResponse<Boolean> offLineInterfaceInfo(@RequestBody IdRequest idRequest) {
+        Boolean aBoolean = interfaceInfoService.offLineInterfaceInfo(idRequest);
+        return ResultUtils.success(aBoolean);
+    }
+
+    /**
+     * 调用接口
+     *
+     * @param interfaceInfoInvokeRequest
+     * @return
+     */
+    @PostMapping( "/invoke" )
+    public BaseResponse<Object> invokeInterfaceInfo(@RequestBody InterfaceInfoInvokeRequest interfaceInfoInvokeRequest) {
+        Object o = interfaceInfoService.invokeInterface(interfaceInfoInvokeRequest);
+        return ResultUtils.success(o);
+    }
+
+
 }

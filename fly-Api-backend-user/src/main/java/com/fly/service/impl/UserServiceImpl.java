@@ -7,30 +7,43 @@ import com.baomidou.mybatisplus.core.toolkit.CollectionUtils;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.plugins.pagination.PageDTO;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
+import com.fly.service.InterfaceInfoService;
+import com.fly.service.UserInterfaceInfoService;
+import com.fly.service.UserService;
 import com.fly.common.ErrorCode;
 import com.fly.constant.CommonConstant;
 import com.fly.constant.LengthConstant;
-import com.fly.constant.UserConstant;
 import com.fly.exception.BusinessException;
-import com.fly.model.entity.User;
-import com.fly.model.enums.UserRoleEnum;
-import com.fly.model.request.DeleteRequest;
-import com.fly.model.request.User.UserAddRequest;
-import com.fly.model.request.User.UserQueryRequest;
-import com.fly.model.request.User.UserUpdateRequest;
-import com.fly.model.vo.LoginPhoneVo;
-import com.fly.model.vo.UserVO;
-import com.fly.service.UserService;
+import com.fly.manager.RedisLimiterManager;
+import com.fly.service.impl.Inner.InnerUserServiceImpl;
+import com.fly.utils.RedisConstants;
+import com.fly.utils.RegexUtils;
+import com.fly.utils.SqlUtils;
+import com.fly.utils.ThrowUtils;
+import com.flyCommon.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.entity.User;
+import com.flyCommon.model.entity.UserInterfaceInfo;
+import com.flyCommon.model.enums.InterfaceInfoStatusEnum;
+import com.flyCommon.model.enums.UserRoleEnum;
+import com.flyCommon.model.request.DeleteRequest;
+import com.flyCommon.model.request.User.UserAddRequest;
+import com.flyCommon.model.request.User.UserQueryRequest;
+import com.flyCommon.model.request.User.UserUpdateRequest;
+import com.flyCommon.model.vo.LoginEmailVo;
+import com.flyCommon.model.vo.LoginPhoneVo;
+import com.flyCommon.model.vo.UserAKSKVo;
+import com.flyCommon.model.vo.UserVO;
 import com.fly.mapper.UserMapper;
-import com.fly.utils.*;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.util.DigestUtils;
 
 import javax.annotation.Resource;
-import javax.servlet.http.HttpServletRequest;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
@@ -41,6 +54,7 @@ import java.util.stream.Collectors;
  * @createDate 2023-07-13 18:24:51
  */
 @Service
+@Slf4j
 public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         implements UserService {
     @Resource
@@ -48,10 +62,14 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
 
+
     public static final String SALT = "fly";
     public static final String USERNAME = "user_" + RandomUtil.randomString(4);
     public static final String PHONEUSERNAME = "phone_" + RandomUtil.randomString(4);
+    public static final String EMAILUSERNAME = "email_" + RandomUtil.randomString(4);
     public static final String USERAVATAR = "https://picsum.photos/200/300";
+    @Resource
+    private RedisLimiterManager redisLimiterManager;
 
 
     @Override
@@ -67,10 +85,15 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             }
             //2. 密码加密
             String entryPassword = DigestUtils.md5DigestAsHex((SALT + userPassword).getBytes());
+
+            String timestamp = Long.toString(System.currentTimeMillis());
+            String entryAk = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomString(8) + timestamp).getBytes());
+            String entrySk = DigestUtils.md5DigestAsHex((SALT + userAccount + RandomUtil.randomString(8) + timestamp).getBytes());
+
             //3.添加用户
             User user = new User();
-            String accessKey = SALT + userAccount + RandomUtil.randomString(5);
-            String secretKey = SALT + userAccount + RandomUtil.randomString(5);
+            String accessKey = entryAk;
+            String secretKey = entrySk;
 
             user.setUserName(USERNAME);
             user.setAccessKey(accessKey);
@@ -109,6 +132,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         //request.getSession().setAttribute(UserConstant.USER_LOGIN_STATE, userVO);
+        // 插入数据
 
         // 使用token
         Map<String, Object> userMap = BeanUtil.beanToMap(userVO);
@@ -119,6 +143,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
         return token;
     }
+
 
     @Override
     public String userLoginByPhone(LoginPhoneVo loginPhoneVo) {
@@ -135,6 +160,31 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的验证码不正确");
         }
         UserVO userVO = basicLoginByPhone(phoneNum);
+        // 转换成map
+        Map<String, Object> map = BeanUtil.beanToMap(userVO);
+
+        // 4. 对象保存到Hash存储
+        redisTemplate.opsForHash().putAll(tokenKey, map);
+        redisTemplate.expire(tokenKey, RedisConstants.LOGIN_USER_TIME, TimeUnit.MINUTES);
+        // 5. 相同就返回token
+        return token;
+    }
+
+    @Override
+    public String userLoginByEmail(LoginEmailVo loginEmailVo) {
+        String email = loginEmailVo.getEmail();
+        if (RegexUtils.isEmailInvalid(email)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的邮箱格式不正确");
+        }
+        String code = loginEmailVo.getCode();
+        // 1. redis获取验证码
+        String key = RedisConstants.LOGIN_CODE_KEY + email;
+        String saveCode = (String) redisTemplate.opsForValue().get(key);
+        // 2. 比较验证码是否相同
+        if (!Objects.equals(saveCode, code)) {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的验证码不正确");
+        }
+        UserVO userVO = basicLoginByEmail(email);
         // 转换成map
         Map<String, Object> map = BeanUtil.beanToMap(userVO);
 
@@ -183,6 +233,42 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         return userVO;
     }
 
+    /**
+     * 登录注册二合一
+     *
+     * @return
+     */
+    public UserVO basicLoginByEmail(String email) {
+        QueryWrapper<User> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("email", email);
+        User user = this.getOne(queryWrapper);
+        if (user == null) {
+            // 用户为空就注册
+            synchronized (email.intern()) {
+                User newUser = new User();
+                String accessKey = SALT + email + RandomUtil.randomString(5);
+                String secretKey = SALT + email + RandomUtil.randomString(5);
+                newUser.setUserName(EMAILUSERNAME);
+                newUser.setUserAvatar(USERAVATAR);
+                newUser.setAccessKey(accessKey);
+                newUser.setUserAccount(EMAILUSERNAME);
+                newUser.setSecretKey(secretKey);
+                newUser.setEmail(email);
+                newUser.setUserPassword(RandomUtil.randomString(6));
+                boolean save = this.save(newUser);
+                if (!save) {
+                    throw new BusinessException(ErrorCode.PARAMS_ERROR, "注册错误");
+                }
+                UserVO userVO = new UserVO();
+                BeanUtils.copyProperties(newUser, userVO);
+                return userVO;
+            }
+        }
+        UserVO userVO = new UserVO();
+        BeanUtils.copyProperties(user, userVO);
+        return userVO;
+    }
+
     @Override
     public String sendCode(String phoneNum) {
         if (phoneNum == null) {
@@ -213,8 +299,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     }
 
     @Override
-    public boolean logout() {
-        Long delete = redisTemplate.opsForHash().delete(tokenKey);
+    public boolean logout(String token) {
+        Long delete = redisTemplate.opsForHash().delete(token);
         return delete == 1;
     }
 
@@ -278,6 +364,7 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public Page<UserVO> listPageUsers(UserQueryRequest userQueryRequest) {
+
         long current = 1;
         long size = 10;
         User queryUser = new User();
@@ -288,6 +375,11 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
         // 限制爬虫
         ThrowUtils.throwIf(size > 20, ErrorCode.FORBIDDEN_ERROR, "禁止爬虫");
+        String key = RedisConstants.USER_LIST_PAGE + userQueryRequest;
+        Page<UserVO> cacheData = (Page<UserVO>) redisTemplate.opsForValue().get(key);
+        if (cacheData != null) {
+            return cacheData;
+        }
 
         //模糊查询
         QueryWrapper<User> queryWrapper = new QueryWrapper<>(queryUser);
@@ -311,7 +403,10 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }).collect(Collectors.toList());
         voPage.setRecords(userVoList);
 
-        return voPage;
+        redisTemplate.opsForValue().set(key, voPage, RedisConstants.USER_LIST_PAGE_TIME, TimeUnit.MINUTES);
+        cacheData = voPage;
+
+        return cacheData;
     }
 
 
@@ -353,6 +448,69 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(user, userVO);
         return userVO;
+    }
+
+    @Override
+    public UserAKSKVo getUserAkSkByToken(UserAKSKVo userAKSKVo) {
+        if (userAKSKVo == null || userAKSKVo.getToken() == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "请重新登录");
+        }
+
+        String voToken = userAKSKVo.getToken();
+        UserAKSKVo userAKSKVoWithOutToken = new UserAKSKVo();
+        String key = RedisConstants.USER_AK_SK + voToken;
+        UserAKSKVo redisAKSK = (UserAKSKVo) redisTemplate.opsForValue().get(key);
+        if (redisAKSK != null) {
+            return redisAKSK;
+        }
+
+        String token = userAKSKVo.getToken();
+        UserVO userVO = getLoginUserRedis(token);
+        User user = new User();
+        BeanUtils.copyProperties(userVO, user);
+        Long userId = user.getId();
+        User byId = this.getById(userId);
+        String accessKey = byId.getAccessKey();
+        String secretKey = byId.getSecretKey();
+        userAKSKVoWithOutToken.setId(userId);
+        userAKSKVoWithOutToken.setAccessKey(accessKey);
+        userAKSKVoWithOutToken.setSecretKey(secretKey);
+        userAKSKVoWithOutToken.setToken(null);
+        redisTemplate.opsForValue().set(key, userAKSKVoWithOutToken, RedisConstants.USER_AK_SK_TIME, TimeUnit.MINUTES);
+
+        return userAKSKVoWithOutToken;
+    }
+
+    @Override
+    public UserAKSKVo updateUserAkSk(UserAKSKVo userAKSKVo) {
+        String token = userAKSKVo.getToken();
+        if (token == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        // 限流
+        redisLimiterManager.doRateLimit(RedisConstants.USER_AK_SK + "_Time_" + token + "too many");
+        UserVO userVO = getLoginUserRedis(token);
+        User user = new User();
+        BeanUtils.copyProperties(userVO, user);
+        String timestamp = Long.toString(System.currentTimeMillis());
+        String entryAk = DigestUtils.md5DigestAsHex((SALT + user.getUserAccount() + RandomUtil.randomString(8) + timestamp).getBytes());
+        String entrySk = DigestUtils.md5DigestAsHex((SALT + user.getUserAccount() + RandomUtil.randomString(8) + timestamp).getBytes());
+
+        user.setAccessKey(entryAk);
+        user.setSecretKey(entrySk);
+        boolean b = this.updateById(user);
+        if (!b) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
+        }
+        String accessKey = user.getAccessKey();
+        String secretKey = user.getSecretKey();
+        UserAKSKVo userAKSKVoWithOutToken = new UserAKSKVo();
+        userAKSKVoWithOutToken.setId(user.getId());
+        userAKSKVoWithOutToken.setSecretKey(secretKey);
+        userAKSKVoWithOutToken.setAccessKey(accessKey);
+        String key = RedisConstants.USER_AK_SK + token;
+        redisTemplate.delete(key);
+        return userAKSKVoWithOutToken;
     }
 
     /**

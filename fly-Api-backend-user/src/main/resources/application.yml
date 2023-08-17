@@ -13,12 +13,19 @@ spring:
   # session
   session:
     timeout: 86400
-    store-type: none
+    store-type: redis
   # redis
   redis:
     port: 6379
     host: localhost
     database: 3
+  mail:
+    host: smtp.qq.com
+    port: 25
+    username: flycodeu@qq.com
+    password: bcvbqwtpurzlddgj
+
+
 server:
   port: 7529
   servlet:
@@ -48,3 +55,9 @@ dubbo:
   registry:
     id: nacos-registry
     address: nacos://localhost:8848
+flyapi:
+  client:
+    assess-key: ef0d10633892b45daec60881f8f86c42
+    secret-key: b61ac354d62dd873b60e8b39b1505000
+
+

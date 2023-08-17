@@ -4,7 +4,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 <mapper namespace="com.fly.mapper.UserInterfaceInfoMapper">
 
-    <resultMap id="BaseResultMap" type="com.fly.model.entity.UserInterfaceInfo">
+    <resultMap id="BaseResultMap" type="com.flyCommon.model.entity.UserInterfaceInfo">
             <id property="id" column="id" jdbcType="BIGINT"/>
             <result property="userId" column="userId" jdbcType="BIGINT"/>
             <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="BIGINT"/>
@@ -21,4 +21,24 @@
         totalNum,leftNum,status,
         createTime,updateTime,isDelete
     </sql>
+
+
+    <select id="listTopInvokeInterfaceInfo" resultType="com.flyCommon.model.vo.InterfaceInfoVo">
+        select interfaceInfoId, sum(totalNum - leftNum) as allInvokeNum
+        from user_interface_info
+        group by interfaceInfoId
+        order by allInvokeNum desc limit #{limit};
+    </select>
+
+
+
+    <select id="listAllInvokeInterfaceInfo" resultType="com.flyCommon.model.vo.InterfaceInoTimeVo">
+        SELECT
+            DATE(createTime) as callDay,
+            interfaceInfoId,
+            SUM(totalNum - leftNum) as allInvokeNum
+        FROM user_interface_info
+        GROUP BY callDay, interfaceInfoId
+        ORDER BY callDay DESC, allInvokeNum DESC;
+    </select>
 </mapper>
