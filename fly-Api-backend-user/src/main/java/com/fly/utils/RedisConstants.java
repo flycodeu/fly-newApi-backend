@@ -46,6 +46,9 @@ public class RedisConstants {
     public static final Long USER_INTERFACE_LIST_PAGE_TIME = 5L;
 
 
+    public static final String USER_INTERFACE_DETAIL_LIST_PAGE = "user:interface:detail:page:";
+    public static final Long USER_INTERFACE_DETAIL_LIST_PAGE_TIME = 5L;
+
     public static final String USER_LIST_PAGE = "user:page:";
     public static final Long USER_LIST_PAGE_TIME = 5L;
 

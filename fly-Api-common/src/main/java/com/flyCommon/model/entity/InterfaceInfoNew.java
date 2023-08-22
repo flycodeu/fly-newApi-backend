@@ -102,6 +102,17 @@ public class InterfaceInfoNew implements Serializable {
      */
     private String requestParams;
 
+    /**
+     * 接口方法名字
+     */
+    private String methodName;
+
+    /**
+     * sdk对应的路径
+     */
+    private String sdkPath;
+
+
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;
 

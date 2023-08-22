@@ -300,8 +300,8 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
 
     @Override
     public boolean logout(String token) {
-        Long delete = redisTemplate.opsForHash().delete(token);
-        return delete == 1;
+        Boolean delete = redisTemplate.delete(token);
+        return delete;
     }
 
     @Override
@@ -553,6 +553,27 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
         }
     }
 
+    /**
+     * 获取每月用户登录情况
+     *
+     * @return
+     */
+    @Override
+    public List<Map<String, Object>> getUserRegisterOrderByMonth() {
+        //SELECT MONTH(createTime) AS month, COUNT(*) AS count
+        //FROM user
+        //WHERE createTime >= '2023-01-01' AND createTime < '2024-01-01'
+        //GROUP BY MONTH(createTime)
+        //ORDER BY MONTH(createTime);
+        String key = RedisConstants.COUNT_USER_REGISTER;
+        List<Map<String, Object>> result = (List<Map<String, Object>>) redisTemplate.opsForValue().get(key);
+        if (result != null) {
+            return result;
+        }
+        result = userMapper.countUsersByMonth("2023-01-01", "2024-01-01");
+        redisTemplate.opsForValue().set(key, result, RedisConstants.COUNT_USER_REGISTER_TIME, TimeUnit.MINUTES);
+        return result;
+    }
 }
 
 

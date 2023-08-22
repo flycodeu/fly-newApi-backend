@@ -5,10 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.IdRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.request.Interface.*;
 import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
 
 import java.util.List;
@@ -75,6 +72,13 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
      * @return
      */
     Page<InterfaceInfoNew> getAllInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest);
+
+    /**
+     * 获取用户创建的接口
+     * @param interfaceInfoUserQueryRequest
+     * @return
+     */
+    Page<InterfaceInfoNew> getUserInterfaceInfoByPage(InterfaceInfoUserQueryRequest interfaceInfoUserQueryRequest);
 
     /**
      * 发布接口

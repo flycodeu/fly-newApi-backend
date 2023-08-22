@@ -5,6 +5,7 @@ import com.baomidou.mybatisplus.extension.service.IService;
 import com.flyCommon.model.entity.UserInterfaceInfo;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.UserInterface.*;
+import com.flyCommon.model.vo.UserInterfaceInfoVo;
 
 import java.util.List;
 
@@ -63,6 +64,8 @@ public interface UserInterfaceInfoService extends IService<UserInterfaceInfo> {
      */
     Page<UserInterfaceInfo> getAllInterfaceInfoByPage(UserInterfaceInfoQueryRequest userInterfaceInfoQueryRequest);
 
+
+    Page<UserInterfaceInfoVo> getAllInterfaceInfoDetailByPage(UserInterfaceInfoVoRequest userInterfaceInfoQueryRequest);
 
     /**
      * 校验

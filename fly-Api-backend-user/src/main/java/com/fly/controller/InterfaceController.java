@@ -9,10 +9,7 @@ import com.fly.common.ResultUtils;
 import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.IdRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
+import com.flyCommon.model.request.Interface.*;
 import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
 import org.springframework.web.bind.annotation.*;
 
@@ -139,5 +136,14 @@ public class InterfaceController {
         return ResultUtils.success(o);
     }
 
-
+    /**
+     * 返回当前用户创建的接口
+     * @param userQueryRequest
+     * @return
+     */
+    @PostMapping( "/userInterface" )
+    public BaseResponse<Page<InterfaceInfoNew>> getUserInterfaceInfoByPage(@RequestBody InterfaceInfoUserQueryRequest userQueryRequest) {
+        Page<InterfaceInfoNew> userInterfaceInfoByPage = interfaceInfoService.getUserInterfaceInfoByPage(userQueryRequest);
+        return ResultUtils.success(userInterfaceInfoByPage);
+    }
 }

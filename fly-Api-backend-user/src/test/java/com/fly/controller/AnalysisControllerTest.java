@@ -31,50 +31,5 @@ class AnalysisControllerTest {
     @Test
     void getTopInvokeInterfaceInfoVo() {
 
-        List<InterfaceInfoVo> userInterfaceInfos = userInterfaceInfoMapper.listTopInvokeInterfaceInfo(3);
-
-        Map<Long, List<InterfaceInfoVo>> map = userInterfaceInfos.stream().collect(Collectors.groupingBy(InterfaceInfoVo::getInterfaceInfoId));
-
-        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id", map.keySet());
-        List<InterfaceInfoNew> interfaceInfoNewList = interfaceInfoService.list(queryWrapper);
-
-        if (CollectionUtils.isEmpty(interfaceInfoNewList)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-        }
-
-        List<InterfaceInfoVo> interfaceInfoVoList = interfaceInfoNewList.stream().map(interfaceInfoNew -> {
-            InterfaceInfoVo interfaceInfoVo = new InterfaceInfoVo();
-            String name = interfaceInfoNew.getName();
-            interfaceInfoVo.setInterfaceInfoName(name);
-            interfaceInfoVo.setInterfaceInfoId(interfaceInfoNew.getId());
-            interfaceInfoVo.setAllInvokeNum(map.get(interfaceInfoNew.getId()).get(0).getAllInvokeNum());
-
-            return interfaceInfoVo;
-        }).collect(Collectors.toList());
-
-        interfaceInfoVoList.forEach(System.out::println);
-
-//        Map<Long, List<InterfaceInfoVo>> map = userInterfaceInfos.stream().collect(Collectors.groupingBy(InterfaceInfoVo::getId));
-//
-//        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
-//        queryWrapper.in("id", map.keySet());
-//        List<InterfaceInfoNew> interfaceInfoNewList = interfaceInfoService.list(queryWrapper);
-//
-//        if (CollectionUtils.isEmpty(interfaceInfoNewList)) {
-//            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-//        }
-//
-//        List<InterfaceInfoVo> interfaceInfoVoList = interfaceInfoNewList
-//                .stream()
-//                .map(interfaceInfoNew -> {
-//                    InterfaceInfoVo interfaceInfoVo = new InterfaceInfoVo();
-//                    BeanUtils.copyProperties(interfaceInfoNew, interfaceInfoVo);
-//                    Integer allInvokeNum = map.get(interfaceInfoNew.getId()).get(0).getAllInvokeNum();
-//                    interfaceInfoVo.setAllInvokeNum(allInvokeNum);
-//                    return interfaceInfoVo;
-//                }).collect(Collectors.toList());
-//
-//        System.out.println(interfaceInfoVoList);
     }
 }

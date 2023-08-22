@@ -10,6 +10,7 @@ import com.fly.mapper.InterfaceInfoMapper;
 import com.fly.service.InterfaceInfoService;
 import com.fly.service.UserService;
 import com.flyCommon.model.entity.UserInterfaceInfo;
+import com.flyCommon.model.request.Interface.*;
 import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
 import com.flySdk.client.FlyApiClient;
 import com.fly.common.ErrorCode;
@@ -17,10 +18,6 @@ import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.enums.InterfaceInfoStatusEnum;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.IdRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoAddRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoInvokeRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoQueryRequest;
-import com.flyCommon.model.request.Interface.InterfaceInfoUpdateRequest;
 import com.flyCommon.model.vo.UserVO;
 import com.fly.utils.ThrowUtils;
 import com.google.gson.Gson;
@@ -30,6 +27,8 @@ import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.Method;
 import java.time.Duration;
 import java.util.List;
 import java.util.regex.Pattern;
@@ -145,6 +144,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (interfaceInfoUpdateRequest == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "参数不能为空");
         }
+
+//        InterfaceInfoQueryRequest interfaceInfoQueryRequest = new InterfaceInfoQueryRequest();
+//        String cacheKey = generateCacheKey(interfaceInfoQueryRequest);
+//        redisTemplate.delete(cacheKey);
+
         InterfaceInfoNew interfaceInfoNew = new InterfaceInfoNew();
         BeanUtils.copyProperties(interfaceInfoUpdateRequest, interfaceInfoNew);
         // 检验
@@ -190,9 +194,9 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
         // Try to retrieve cached data from Redis
         Page<InterfaceInfoNew> cachedData = getCachedData(cacheKey);
-        if (cachedData != null) {
-            return cachedData;
-        }
+//        if (cachedData != null) {
+//            return cachedData;
+//        }
 
         // If not cached, perform the database query
         Page<InterfaceInfoNew> result = executeQuery(interfaceInfoQueryRequest);
@@ -203,17 +207,31 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         return result;
     }
 
+    @Override
+    public Page<InterfaceInfoNew> getUserInterfaceInfoByPage(InterfaceInfoUserQueryRequest interfaceInfoUserQueryRequest) {
+        Long userId = interfaceInfoUserQueryRequest.getUserId();
+        if (userId == null) {
+            throw new BusinessException(ErrorCode.NOT_LOGIN_ERROR);
+        }
+        long current = interfaceInfoUserQueryRequest.getCurrent();
+        long pageSize = interfaceInfoUserQueryRequest.getPageSize();
+        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
+        queryWrapper.eq("userId", userId);
+        return this.page(new Page<>(current, pageSize), queryWrapper);
+    }
+
     // 生成key
     private String generateCacheKey(InterfaceInfoQueryRequest request) {
         return "interface_info_cache:" + request.toString();
     }
+
     // 获取数据
     private Page<InterfaceInfoNew> getCachedData(String cacheKey) {
         return (Page<InterfaceInfoNew>) redisTemplate.opsForValue().get(cacheKey);
     }
+
     // 缓存数据
     private void cacheData(String cacheKey, Page<InterfaceInfoNew> data) {
-
         redisTemplate.opsForValue().set(cacheKey, data, Duration.ofMinutes(10)); // Set a suitable timeout
     }
 
@@ -296,26 +314,36 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+        // 删除原来的缓存
+//        InterfaceInfoQueryRequest interfaceInfoQueryRequest = new InterfaceInfoQueryRequest();
+//        String cacheKey = generateCacheKey(interfaceInfoQueryRequest);
+//        redisTemplate.delete(cacheKey);
+
+
         Long id = idRequest.getId();
         InterfaceInfoNew interfaceInfoNew = this.getById(id);
         if (interfaceInfoNew == null) {
             throw new BusinessException(ErrorCode.NOT_FOUND_ERROR);
         }
         // todo 判断是否可以调用
-        com.flySdk.model.User user = new com.flySdk.model.User();
-        user.setName("fly");
-        String res = flyApiClient.getNameByPostJson(user);
-        if (StringUtils.isBlank(res)) {
-            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
-        }
+//        com.flySdk.model.User user = new com.flySdk.model.User();
+//        user.setName("fly");
+//        String res = flyApiClient.getNameByPostJson(user);
+//
+//        if (StringUtils.isBlank(res)) {
+//            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+//        }
+
         // 修改上线
         InterfaceInfoNew interfaceInfoNew1 = new InterfaceInfoNew();
         interfaceInfoNew1.setId(id);
         interfaceInfoNew1.setStatus(InterfaceInfoStatusEnum.ONLINE.getValue());
+        interfaceInfoNew1.setPrice(interfaceInfoNew.getPrice());
         boolean b = this.updateById(interfaceInfoNew1);
         if (!b) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
         }
+
 
         return true;
     }
@@ -325,6 +353,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         if (idRequest == null || idRequest.getId() <= 0) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
+//        InterfaceInfoQueryRequest interfaceInfoQueryRequest = new InterfaceInfoQueryRequest();
+//        String cacheKey = generateCacheKey(interfaceInfoQueryRequest);
+//        redisTemplate.delete(cacheKey);
+
         Long id = idRequest.getId();
         InterfaceInfoNew interfaceInfoNew = this.getById(id);
         if (interfaceInfoNew == null) {
@@ -334,6 +367,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         InterfaceInfoNew interfaceInfoNew1 = new InterfaceInfoNew();
         interfaceInfoNew1.setId(id);
         interfaceInfoNew1.setStatus(InterfaceInfoStatusEnum.OFFLINE.getValue());
+        interfaceInfoNew1.setPrice(interfaceInfoNew.getPrice());
         boolean b = this.updateById(interfaceInfoNew1);
         if (!b) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
@@ -365,12 +399,52 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
         String accessKey = user.getAccessKey();
         String secretKey = user.getSecretKey();
-        FlyApiClient flyApiClient2 = new FlyApiClient(accessKey, secretKey);
+//        FlyApiClient flyApiClient2 = new FlyApiClient(accessKey, secretKey);
+//
+//        Gson gson = new Gson();
+//        com.flySdk.model.User fromJson = gson.fromJson(requestParams, com.flySdk.model.User.class);
 
-        Gson gson = new Gson();
-        com.flySdk.model.User fromJson = gson.fromJson(requestParams, com.flySdk.model.User.class);
+        Object res = invokeInterfaceInfo(interfaceInfoNew.getSdkPath(), interfaceInfoNew.getMethodName(), requestParams, accessKey, secretKey);
 
-        return flyApiClient2.getNameByPostJson(fromJson);
+//        return flyApiClient2.getNameByPostJson(fromJson);
+        if (res == null) {
+            res = "请求接口存在问题，稍后再试";
+        }
+
+        return res;
+    }
+
+    // 反射获取接口
+    private Object invokeInterfaceInfo(String classPath, String methodName, String userRequestParams,
+                                       String accessKey, String secretKey) {
+        try {
+            Class<?> clientClazz = Class.forName(classPath);
+            // 1. 获取构造器，参数为ak,sk
+            Constructor<?> binApiClientConstructor = clientClazz.getConstructor(String.class, String.class);
+            // 2. 构造出客户端
+            Object apiClient = binApiClientConstructor.newInstance(accessKey, secretKey);
+
+            // 3. 找到要调用的方法
+            Method[] methods = clientClazz.getMethods();
+            for (Method method : methods) {
+                if (method.getName().equals(methodName)) {
+                    // 3.1 获取参数类型列表
+                    Class<?>[] parameterTypes = method.getParameterTypes();
+                    if (parameterTypes.length == 0) {
+                        // 如果没有参数，直接调用
+                        return method.invoke(apiClient);
+                    }
+                    Gson gson = new Gson();
+                    // 构造参数
+                    Object parameter = gson.fromJson(userRequestParams, parameterTypes[0]);
+                    return method.invoke(apiClient, parameter);
+                }
+            }
+            return null;
+        } catch (Exception e) {
+            e.printStackTrace();
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR, "找不到调用的方法!! 请检查你的请求参数是否正确!");
+        }
     }
 
 

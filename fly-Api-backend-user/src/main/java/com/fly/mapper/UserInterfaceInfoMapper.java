@@ -26,7 +26,7 @@ public interface UserInterfaceInfoMapper extends BaseMapper<UserInterfaceInfo> {
      * @param limit
      * @return
      */
-    List<InterfaceInfoVo> listTopInvokeInterfaceInfo(int limit);
+    List<UserInterfaceInfo> listTopInvokeInterfaceInfo(int limit);
 
     /**
      * 获取所有数据

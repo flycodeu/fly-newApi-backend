@@ -55,6 +55,7 @@ dubbo:
   registry:
     id: nacos-registry
     address: nacos://localhost:8848
+
 flyapi:
   client:
     assess-key: ef0d10633892b45daec60881f8f86c42

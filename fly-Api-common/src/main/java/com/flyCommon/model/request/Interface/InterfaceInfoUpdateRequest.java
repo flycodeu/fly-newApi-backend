@@ -68,5 +68,16 @@ public class InterfaceInfoUpdateRequest implements Serializable {
     private String method;
 
 
+    /**
+     * 接口方法名字
+     */
+    private String methodName;
+
+    /**
+     * sdk对应的路径
+     */
+    private String sdkPath;
+
+
     private static final long serialVersionUID = 1L;
 }

@@ -13,9 +13,11 @@ import com.fly.service.UserInterfaceInfoService;
 import com.fly.utils.RedisConstants;
 import com.fly.utils.ThrowUtils;
 import com.flyCommon.model.entity.InterfaceInfoNew;
+import com.flyCommon.model.entity.User;
 import com.flyCommon.model.entity.UserInterfaceInfo;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.UserInterface.*;
+import com.flyCommon.model.vo.UserInterfaceInfoVo;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.redis.core.RedisTemplate;
@@ -45,6 +47,8 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private UserServiceImpl userService;
 
     @Override
     public Long addUserInterfaceInfo(UserInterfaceInfoAddRequest userInterfaceInfoAddRequest) {
@@ -66,7 +70,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
         userInterfaceInfo.setInterfaceInfoId(interfaceInfoId);
         userInterfaceInfo.setUserId(userId);
-        userInterfaceInfo.setTotalNum(totalNum);
+        userInterfaceInfo.setTotalNum(0);
         userInterfaceInfo.setLeftNum(invokeCount);
         userInterfaceInfo.setStatus(0);
         boolean save = this.save(userInterfaceInfo);
@@ -94,7 +98,6 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
         userInterfaceInfo.setId(id);
         userInterfaceInfo.setStatus(status);
-        userInterfaceInfo.setTotalNum(totalNum);
         userInterfaceInfo.setLeftNum(leftNum);
         validUserInterfaceInfo(userInterfaceInfo, false);
         return this.updateById(userInterfaceInfo);
@@ -147,7 +150,65 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 
         cacheData = this.page(new Page<>(current, pageSize), queryWrapper);
         redisTemplate.opsForValue().set(key, cacheData, RedisConstants.USER_INTERFACE_LIST_PAGE_TIME, TimeUnit.MINUTES);
-        log.error("cost===>" + (System.currentTimeMillis() - begin));
+//        log.error("cost===>" + (System.currentTimeMillis() - begin));
+        return cacheData;
+    }
+
+    /**
+     * 返回详细接口用户信息
+     *
+     * @param userInterfaceInfoQueryRequest
+     * @return
+     */
+    @Override
+    public Page<UserInterfaceInfoVo> getAllInterfaceInfoDetailByPage(UserInterfaceInfoVoRequest userInterfaceInfoQueryRequest) {
+        if (userInterfaceInfoQueryRequest == null) {
+            throw new BusinessException(ErrorCode.SYSTEM_ERROR);
+        }
+
+        String key = RedisConstants.USER_INTERFACE_DETAIL_LIST_PAGE + userInterfaceInfoQueryRequest;
+        Page<UserInterfaceInfoVo> cacheData = (Page<UserInterfaceInfoVo>) redisTemplate.opsForValue().get(key);
+        if (cacheData != null) {
+            return cacheData;
+        }
+
+        UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+        userInterfaceInfo.setUserId(userInterfaceInfoQueryRequest.getUserId());
+        userInterfaceInfo.setInterfaceInfoId(userInterfaceInfoQueryRequest.getInterfaceInfoId());
+        userInterfaceInfo.setStatus(userInterfaceInfoQueryRequest.getStatus());
+
+        long pageSize = userInterfaceInfoQueryRequest.getPageSize();
+        long current = userInterfaceInfoQueryRequest.getCurrent();
+        String sortOrder = userInterfaceInfoQueryRequest.getSortOrder();
+        String sortField = userInterfaceInfoQueryRequest.getSortField();
+        ThrowUtils.throwIf(pageSize > 20, ErrorCode.FORBIDDEN_ERROR, "请勿爬虫");
+        QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>(userInterfaceInfo);
+        queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
+                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+        queryWrapper.orderByDesc("id");
+
+        Page<UserInterfaceInfo> page = this.page(new Page<>(current, pageSize), queryWrapper);
+        List<UserInterfaceInfoVo> infoVoList = page.getRecords().stream().map(userInterfaceInfo1 -> {
+            Long userId = userInterfaceInfo1.getUserId();
+            Long interfaceInfoId = userInterfaceInfo1.getInterfaceInfoId();
+            UserInterfaceInfoVo userInterfaceInfoVo = new UserInterfaceInfoVo();
+            User user = userService.getById(userId);
+            InterfaceInfoNew interfaceInfoNew = interfaceInfoService.getById(interfaceInfoId);
+            userInterfaceInfoVo.setUserId(userId);
+            userInterfaceInfoVo.setUserName(user.getUserName());
+            userInterfaceInfoVo.setInterfaceInfoId(interfaceInfoId);
+            userInterfaceInfoVo.setInterfaceInfoName(interfaceInfoNew.getName());
+            userInterfaceInfoVo.setLeftCount(userInterfaceInfo1.getLeftNum());
+            userInterfaceInfoVo.setTotalCount(userInterfaceInfo1.getTotalNum());
+            userInterfaceInfoVo.setId(userInterfaceInfo1.getId());
+            userInterfaceInfoVo.setStatus(userInterfaceInfo1.getStatus());
+            return userInterfaceInfoVo;
+        }).collect(Collectors.toList());
+
+        cacheData = new Page<>(current, pageSize);
+        cacheData.setRecords(infoVoList);
+
+        redisTemplate.opsForValue().set(key, cacheData, RedisConstants.USER_INTERFACE_DETAIL_LIST_PAGE_TIME, TimeUnit.MINUTES);
         return cacheData;
     }
 
@@ -183,7 +244,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             UpdateWrapper<UserInterfaceInfo> updateWrapper = new UpdateWrapper<>();
             updateWrapper.eq("interfaceInfoId", interfaceInfoId);
             updateWrapper.eq("userId", userId);
-            updateWrapper.setSql("leftNum=leftNum-1");
+            updateWrapper.setSql("leftNum=leftNum-1,totalNum=totalNum+1");
             updateWrapper.gt("leftNum", 0);
             return this.update(updateWrapper);
         } catch (Exception e) {
@@ -198,7 +259,6 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         if (userInterfaceInfoCount == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-
         Long userId = userInterfaceInfoCount.getUserId();
         Long interfaceInfoId = userInterfaceInfoCount.getInterfaceInfoId();
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
@@ -244,7 +304,6 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
                 newEntry.setInterfaceInfoId(interfaceInfo.getId());
                 newEntry.setUserId(userId);
                 newEntry.setLeftNum(interfaceInfo.getInvokeCount());
-                newEntry.setTotalNum(interfaceInfo.getInvokeCount());
                 userInterfaceInfosToAdd.add(newEntry);
             }
         }

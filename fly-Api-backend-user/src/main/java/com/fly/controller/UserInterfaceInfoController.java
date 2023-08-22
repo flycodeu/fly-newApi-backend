@@ -9,6 +9,7 @@ import com.fly.service.UserInterfaceInfoService;
 import com.flyCommon.model.entity.UserInterfaceInfo;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.UserInterface.*;
+import com.flyCommon.model.vo.UserInterfaceInfoVo;
 import org.springframework.web.bind.annotation.*;
 
 import javax.annotation.Resource;
@@ -99,6 +100,18 @@ public class UserInterfaceInfoController {
         return ResultUtils.success(allInterfaceInfoByPage);
     }
 
+
+    /**
+     * 返回详细的接口信息
+     * @param userInterfaceInfoVoRequest
+     * @return
+     */
+    @PostMapping( "/getAll/datail/page" )
+    @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
+    public BaseResponse<Page<UserInterfaceInfoVo>> getAllUserInterfaceInfoDetailByPage(@RequestBody UserInterfaceInfoVoRequest userInterfaceInfoVoRequest) {
+        Page<UserInterfaceInfoVo> allInterfaceInfoByPage = userInterfaceInfoService.getAllInterfaceInfoDetailByPage(userInterfaceInfoVoRequest);
+        return ResultUtils.success(allInterfaceInfoByPage);
+    }
 
     /**
      * 获取调用次数

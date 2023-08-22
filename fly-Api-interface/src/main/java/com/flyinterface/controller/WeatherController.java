@@ -8,8 +8,8 @@ import com.flyCommon.common.ErrorCode;
 import com.flyCommon.common.ResultUtils;
 import com.flyCommon.exception.BusinessException;
 import com.flyinterface.Key;
+import com.flyinterface.entity.Request.WeatherRequest;
 import com.flyinterface.entity.XinZhiWeather;
-import lombok.Data;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -19,11 +19,14 @@ public class WeatherController {
     /**
      * 调用心知天气
      *
-     * @param location
      * @return
      */
-    @GetMapping( "/localtion" )
-    public BaseResponse<XinZhiWeather> xinzhiWeather(@RequestParam( value = "location", required = false, defaultValue = "北京" ) String location) {
+    @PostMapping( "/localtion" )
+    public BaseResponse<XinZhiWeather> xinzhiWeather(@RequestBody WeatherRequest weatherRequest) {
+        if (weatherRequest==null){
+            throw new BusinessException(ErrorCode.PARAMS_ERROR);
+        }
+        String location = weatherRequest.getLocation();
         String url = "https://api.seniverse.com/v3/weather/now.json?key=" + Key.xinZhiAPIKey +
                 "&location=" + location + "&language=zh-Hans&unit=c";
 
@@ -61,6 +64,15 @@ public class WeatherController {
     }
 
 
-
+    /**
+     * 调用博天天气
+     * @return
+     */
+    @GetMapping("/botian")
+    public BaseResponse<String> botianWeather(){
+        String url = "https://api.oioweb.cn/api/weather/GetWeather";
+        String res = HttpUtil.get(url);
+        return ResultUtils.success(res);
+    }
 
 }

@@ -9,6 +9,7 @@ import com.fly.constant.UserConstant;
 import com.fly.exception.BusinessException;
 import com.fly.mapper.UserInterfaceInfoMapper;
 import com.fly.service.impl.InterfaceInfoServiceImpl;
+import com.fly.service.impl.UserServiceImpl;
 import com.fly.utils.RedisConstants;
 import com.flyCommon.common.BaseResponse;
 import com.flyCommon.common.ResultUtils;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.RestController;
 import javax.annotation.Resource;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
 /**
@@ -44,6 +46,8 @@ public class AnalysisController {
     private InterfaceInfoServiceImpl interfaceInfoService;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private UserServiceImpl userService;
 
     /**
      * 分析前top个数据
@@ -53,39 +57,45 @@ public class AnalysisController {
     @GetMapping( "/top" )
     @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
     public BaseResponse<List<InterfaceInfoVo>> getTopInvokeInterfaceInfoVo(int limit) {
-        String key = RedisConstants.TOP_LIST_INTERFACE + limit;
-        List<InterfaceInfoVo> interfaceInfoVoList;
-        interfaceInfoVoList = (List<InterfaceInfoVo>) redisTemplate.opsForValue().get(key);
-        if (interfaceInfoVoList != null) {
-            return ResultUtils.success(interfaceInfoVoList);
+        String key = RedisConstants.COUNT_LIST_INTERFACE;
+        List<InterfaceInfoVo> infoVoList = (List<InterfaceInfoVo>) redisTemplate.opsForValue().get(key);
+        if (infoVoList != null) {
+            return ResultUtils.success(infoVoList);
         }
 
-        // 返回InterfaceInfoVo集合
-        List<InterfaceInfoVo> userInterfaceInfos = userInterfaceInfoMapper.listTopInvokeInterfaceInfo(limit);
-        // 将集合转换为map
-        Map<Long, List<InterfaceInfoVo>> map = userInterfaceInfos.stream().collect(Collectors.groupingBy(InterfaceInfoVo::getInterfaceInfoId));
-        // 获取到接口里面的所有符合的id
-        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
-        queryWrapper.in("id", map.keySet());
-        List<InterfaceInfoNew> interfaceInfoNewList = interfaceInfoService.list(queryWrapper);
+        List<UserInterfaceInfo> userInterfaceInfoList = userInterfaceInfoMapper.listTopInvokeInterfaceInfo(limit);
+        Map<Long, List<UserInterfaceInfo>> interfaceInfoObjMap = userInterfaceInfoList.stream().collect(Collectors.groupingBy(UserInterfaceInfo::getInterfaceInfoId));
 
-        if (CollectionUtils.isEmpty(interfaceInfoNewList)) {
+        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
+        queryWrapper.in("id", interfaceInfoObjMap.keySet());
+        List<InterfaceInfoNew> interfaceInfoList = interfaceInfoService.list(queryWrapper);
+        if (CollectionUtils.isEmpty(interfaceInfoList)) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
-        // 给interfaceInfoVo赋值
-        interfaceInfoVoList = interfaceInfoNewList.stream().map(interfaceInfoNew -> {
-            InterfaceInfoVo interfaceInfoVo = new InterfaceInfoVo();
-            String name = interfaceInfoNew.getName();
-            interfaceInfoVo.setInterfaceInfoName(name);
-            interfaceInfoVo.setInterfaceInfoId(interfaceInfoNew.getId());
-            interfaceInfoVo.setAllInvokeNum(map.get(interfaceInfoNew.getId()).get(0).getAllInvokeNum());
 
+        infoVoList = interfaceInfoList.stream().map(interfaceInfo -> {
+            InterfaceInfoVo interfaceInfoVo = new InterfaceInfoVo();
+            BeanUtils.copyProperties(interfaceInfo, interfaceInfoVo);
+            int totalNum = interfaceInfoObjMap.get(interfaceInfo.getId()).get(0).getTotalNum();
+            interfaceInfoVo.setTotalNum(totalNum);
             return interfaceInfoVo;
         }).collect(Collectors.toList());
 
-        redisTemplate.opsForValue().set(key, interfaceInfoVoList);
+        redisTemplate.opsForValue().set(key, infoVoList, RedisConstants.COUNT_LIST_INTERFACE_TIME, TimeUnit.MINUTES);
 
-        return ResultUtils.success(interfaceInfoVoList);
+        return ResultUtils.success(infoVoList);
+    }
+
+    /**
+     * 查看每月用户注册情况
+     *
+     * @return
+     */
+    @GetMapping( "/registerCount" )
+    @AuthCheck( mustRole = UserConstant.ADMIN_ROLE )
+    public BaseResponse<List<Map<String, Object>>> getUserRegisterOrderByMonth() {
+        List<Map<String, Object>> userRegisterOrderByMonth = userService.getUserRegisterOrderByMonth();
+        return ResultUtils.success(userRegisterOrderByMonth);
     }
 
 

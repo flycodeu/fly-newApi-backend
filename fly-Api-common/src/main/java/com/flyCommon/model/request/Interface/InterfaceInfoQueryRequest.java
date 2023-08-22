@@ -35,7 +35,6 @@ public class InterfaceInfoQueryRequest extends PageRequest implements Serializab
 
     private String IPAddress;
 
-
     /**
      * 调用次数
      */

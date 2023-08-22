@@ -14,6 +14,7 @@ import com.flyCommon.model.vo.UserAKSKVo;
 import com.flyCommon.model.vo.UserVO;
 
 import java.util.List;
+import java.util.Map;
 
 /**
  * @author admin
@@ -151,4 +152,6 @@ public interface UserService extends IService<User> {
      * @return
      */
     UserAKSKVo updateUserAkSk(UserAKSKVo userAKSKVo);
+
+    List<Map<String, Object>> getUserRegisterOrderByMonth();
 }
