@@ -166,7 +166,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
 
-        String key = RedisConstants.USER_INTERFACE_DETAIL_LIST_PAGE + userInterfaceInfoQueryRequest;
+        String key = RedisConstants.USER_INTERFACE_DETAIL_LIST_PAGE + userInterfaceInfoQueryRequest.getUserName() + ":" + userInterfaceInfoQueryRequest.getInterfaceInfoName() + ":" + userInterfaceInfoQueryRequest.getStatus() + ":" + userInterfaceInfoQueryRequest.getCurrent() + ":" + userInterfaceInfoQueryRequest.getPageSize();
         Page<UserInterfaceInfoVo> cacheData = (Page<UserInterfaceInfoVo>) redisTemplate.opsForValue().get(key);
         if (cacheData != null) {
             return cacheData;
@@ -181,13 +181,16 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         long current = userInterfaceInfoQueryRequest.getCurrent();
         String sortOrder = userInterfaceInfoQueryRequest.getSortOrder();
         String sortField = userInterfaceInfoQueryRequest.getSortField();
-        ThrowUtils.throwIf(pageSize > 20, ErrorCode.FORBIDDEN_ERROR, "请勿爬虫");
+        ThrowUtils.throwIf(pageSize > 40, ErrorCode.FORBIDDEN_ERROR, "请勿爬虫");
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>(userInterfaceInfo);
         queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
                 sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
         queryWrapper.orderByDesc("id");
 
         Page<UserInterfaceInfo> page = this.page(new Page<>(current, pageSize), queryWrapper);
+        long pageCurrent = page.getCurrent();
+        long total = page.getTotal();
+
         List<UserInterfaceInfoVo> infoVoList = page.getRecords().stream().map(userInterfaceInfo1 -> {
             Long userId = userInterfaceInfo1.getUserId();
             Long interfaceInfoId = userInterfaceInfo1.getInterfaceInfoId();
@@ -205,8 +208,9 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
             return userInterfaceInfoVo;
         }).collect(Collectors.toList());
 
-        cacheData = new Page<>(current, pageSize);
+        cacheData = new Page<>(pageCurrent, pageSize);
         cacheData.setRecords(infoVoList);
+        cacheData.setTotal(total);
 
         redisTemplate.opsForValue().set(key, cacheData, RedisConstants.USER_INTERFACE_DETAIL_LIST_PAGE_TIME, TimeUnit.MINUTES);
         return cacheData;

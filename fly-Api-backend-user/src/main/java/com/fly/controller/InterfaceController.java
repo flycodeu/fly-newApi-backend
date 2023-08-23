@@ -98,6 +98,19 @@ public class InterfaceController {
         return ResultUtils.success(allInterfaceInfoByPage);
     }
 
+
+    /**
+     * 接口分页 上线
+     *
+     * @param interfaceInfoQueryRequest
+     * @return
+     */
+    @PostMapping( "/interface/onlinePage" )
+    public BaseResponse<Page<InterfaceInfoNew>> getOnlineInterfaceInfoPage(@RequestBody InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+        Page<InterfaceInfoNew> allInterfaceInfoByPage = interfaceInfoService.getOnlineInterfaceInfoByPage(interfaceInfoQueryRequest);
+        return ResultUtils.success(allInterfaceInfoByPage);
+    }
+
     /**
      * 管理员上线接口
      *

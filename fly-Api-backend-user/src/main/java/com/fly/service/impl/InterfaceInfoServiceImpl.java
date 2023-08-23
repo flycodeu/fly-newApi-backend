@@ -1,10 +1,12 @@
 package com.fly.service.impl;
 
+import cn.hutool.http.HttpUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 
 import com.fly.constant.CommonConstant;
+import com.fly.constant.UserConstant;
 import com.fly.exception.BusinessException;
 import com.fly.mapper.InterfaceInfoMapper;
 import com.fly.service.InterfaceInfoService;
@@ -30,7 +32,10 @@ import javax.annotation.Resource;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Method;
 import java.time.Duration;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.Objects;
 import java.util.regex.Pattern;
 
 /**
@@ -62,6 +67,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         this.validInterfaceInfo(interfaceInfoNew, true);
         UserVO loginUserRedis = userService.getLoginUserRedis(token);
         Long userId = loginUserRedis.getId();
+
+        if (!Objects.equals(loginUserRedis.getUserRole(), UserConstant.ADMIN_ROLE)) {
+            interfaceInfoNew.setStatus(InterfaceInfoStatusEnum.EXAMINE.getValue());
+        }
+
         interfaceInfoNew.setUserId(userId);
         boolean save = this.save(interfaceInfoNew);
         if (!save) {
@@ -344,7 +354,6 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
             throw new BusinessException(ErrorCode.SYSTEM_ERROR, "更新失败");
         }
 
-
         return true;
     }
 
@@ -404,6 +413,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 //        Gson gson = new Gson();
 //        com.flySdk.model.User fromJson = gson.fromJson(requestParams, com.flySdk.model.User.class);
 
+
         Object res = invokeInterfaceInfo(interfaceInfoNew.getSdkPath(), interfaceInfoNew.getMethodName(), requestParams, accessKey, secretKey);
 
 //        return flyApiClient2.getNameByPostJson(fromJson);
@@ -413,6 +423,44 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
         return res;
     }
+
+    @Override
+    public Page<InterfaceInfoNew> getOnlineInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest) {
+        long pageSize = interfaceInfoQueryRequest.getPageSize();
+        long current = interfaceInfoQueryRequest.getCurrent();
+        String sortOrder = interfaceInfoQueryRequest.getSortOrder();
+        String sortField = interfaceInfoQueryRequest.getSortField();
+        String name = interfaceInfoQueryRequest.getName();
+        Integer port = interfaceInfoQueryRequest.getPort();
+        Integer status = interfaceInfoQueryRequest.getStatus();
+        String method = interfaceInfoQueryRequest.getMethod();
+        String description = interfaceInfoQueryRequest.getDescription();
+
+        QueryWrapper<InterfaceInfoNew> queryWrapper = new QueryWrapper<>();
+        if (name != null) {
+            queryWrapper.like("name", name);
+        }
+        if (port != null) {
+            queryWrapper.eq("port", port);
+        }
+        if (status != null) {
+            queryWrapper.eq("status", status);
+        }
+        if (method != null) {
+            queryWrapper.like("method", method);
+        }
+        if (description != null) {
+            queryWrapper.like("description", description);
+        }
+
+        queryWrapper.eq("status", 1);
+
+        queryWrapper.orderBy(StringUtils.isNotBlank(sortField),
+                sortOrder.equals(CommonConstant.SORT_ORDER_ASC), sortField);
+        queryWrapper.orderByDesc("id");
+        return this.page(new Page<>(current, pageSize), queryWrapper);
+    }
+
 
     // 反射获取接口
     private Object invokeInterfaceInfo(String classPath, String methodName, String userRequestParams,
@@ -464,6 +512,7 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         }
         return false;
     }
+
 
 
 }

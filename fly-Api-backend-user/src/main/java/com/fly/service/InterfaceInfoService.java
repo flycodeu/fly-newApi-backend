@@ -75,6 +75,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 获取用户创建的接口
+     *
      * @param interfaceInfoUserQueryRequest
      * @return
      */
@@ -82,6 +83,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 发布接口
+     *
      * @param idRequest
      * @return
      */
@@ -89,6 +91,7 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 下线接口
+     *
      * @param idRequest
      * @return
      */
@@ -96,11 +99,18 @@ public interface InterfaceInfoService extends IService<InterfaceInfoNew> {
 
     /**
      * 调用接口
+     *
      * @param interfaceInfoInvokeRequest
      * @return
      */
     Object invokeInterface(InterfaceInfoInvokeRequest interfaceInfoInvokeRequest);
 
-
+    /**
+     * 获取线上的接口
+     *
+     * @param interfaceInfoQueryRequest
+     * @return
+     */
+    Page<InterfaceInfoNew> getOnlineInterfaceInfoByPage(InterfaceInfoQueryRequest interfaceInfoQueryRequest);
 
 }
