@@ -5,4 +5,10 @@ public interface Key {
     String xinZhiAPIKey = "SW0AkZ0B-fDGe85J5";
 
     String yucongmingModelId = "";
+
+    String mini_max_group_id = "1692538450973139";
+
+    String mini_max_api_key = "eyJhbGciOiJSUzI1NiIsInR5cCI6IkpXVCJ9.eyJOYW1lIjoiMTExIiwiU3ViamVjdElEIjoiMTY5MjUzODQ1MDQyMTc5MyIsIlBob25lIjoiIiwiR3JvdXBJRCI6IjE2OTI1Mzg0NTA5NzMxMzkiLCJQYWdlTmFtZSI6IiIsIk1haWwiOiIxNzg1NjEzMDQ4QHFxLmNvbSIsIkNyZWF0ZVRpbWUiOiIyMDIzLTA4LTIwIDIxOjM2OjUwIiwiaXNzIjoibWluaW1heCJ9.mmTZylAOFf7KqHmK40p5GiGRGCLS2ei_DxEs8NtbSf-SyMHPPpC2KEXwrlTY0xGzNbmStRefAT_AZkLD5O8AYw67DIWg9AiUCHMq_BsZwSEuDjpj24R8g1hVPHe5BFWuoy1eHtIVTKIVFUz2hJhsHtqs2p230H12hkJd0hghCqUGBvsR-TURXeUBYHoOJlk9xFI6ZdH-Ozkjrf3rgfDC9M8AlC4ejXzKRTcrSt0Bxjr42kTkWSmC-wqINgxmugKUCR7BaXLwiDHQqYJRz1gsTSNmew8rgX0FPacF94-Nc7QmWFaqEwOJbWPQfxrOyIRDdosgJcDu98tRYGNEnq5P1Q"; // 替换为你的API密钥
+
+
 }
