@@ -8,14 +8,61 @@
         <version>2.7.13</version>
         <relativePath/> <!-- lookup parent from repository -->
     </parent>
-    <groupId>com.fly.sdk</groupId>
+
+    <groupId>io.github.flybase1</groupId>
     <artifactId>fly-Api-stater</artifactId>
-    <version>0.0.1-test</version>
+    <version>0.0.2</version>
     <name>fly-Api-stater</name>
     <description>fly-Api-stater</description>
     <properties>
         <java.version>1.8</java.version>
+        <projectUrl>https://github.com/flybase1/flyapi-client-sdk.git</projectUrl>
+        <serverId>sonatype</serverId>
+        <javadoc.opts>-Xdoclint:none</javadoc.opts>
     </properties>
+
+    <developers>
+        <developer>
+            <name>zhoufei</name>
+            <email>1785613048@qq.com</email>
+            <url>${projectUrl}</url>
+            <roles>
+                <role>Developer</role>
+            </roles>
+            <timezone>+8</timezone>
+        </developer>
+    </developers>
+
+    <!--以下部分内容不需要修改，直接复制咱贴即可-->
+    <url>${projectUrl}</url>
+    <licenses>
+        <license>
+            <name>The Apache Software License, Version 2.0</name>
+            <url>http://www.apache.org/licenses/LICENSE-2.0.txt</url>
+            <distribution>repo,manual</distribution>
+        </license>
+    </licenses>
+    <scm>
+        <!-- 采用projectUrl变量代替这个值，方便给重复利用这个配置，也就是上面的标签替换一下值就行 -->
+        <connection>${projectUrl}</connection>
+        <developerConnection>${projectUrl}</developerConnection>
+        <url>${projectUrl}</url>
+    </scm>
+    <distributionManagement>
+        <snapshotRepository>
+            <!--这个id和settings.xml中servers.server.id要相同，因为上传jar需要登录才有权限-->
+            <id>${serverId}</id>
+            <name>OSS Snapshots Repository</name>
+            <url>https://s01.oss.sonatype.org/content/repositories/snapshots/</url>
+        </snapshotRepository>
+        <repository>
+            <!--这个id和settings.xml中servers.server.id要相同，因为上传jar需要登录才有权限-->
+            <id>${serverId}</id>
+            <name>OSS Staging Repository</name>
+            <url>https://s01.oss.sonatype.org/service/local/staging/deploy/maven2/</url>
+        </repository>
+    </distributionManagement>
+
     <dependencies>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -49,5 +96,82 @@
         </dependency>
     </dependencies>
 
+
+<!--    <build>-->
+<!--        <plugins>-->
+<!--            &lt;!&ndash; 编译插件，设置源码以及编译的jdk版本 &ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-compiler-plugin</artifactId>-->
+<!--                <configuration>-->
+<!--                    <source>8</source>-->
+<!--                    <target>8</target>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--            &lt;!&ndash;打包源码的插件&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-source-plugin</artifactId>-->
+<!--                <version>2.2.1</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>attach-sources</id>-->
+<!--                        <goals>-->
+<!--                            <goal>jar-no-fork</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            &lt;!&ndash; Javadoc 文档生成插件&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-javadoc-plugin</artifactId>-->
+<!--                <version>2.9.1</version>-->
+<!--                <configuration>-->
+<!--                    &lt;!&ndash; 忽略生成文档中的错误 &ndash;&gt;-->
+<!--                    <additionalparam>-Xdoclint:none</additionalparam>-->
+<!--                    <aggregate>true</aggregate>-->
+<!--                    <charset>UTF-8</charset>&lt;!&ndash; utf-8读取文件 &ndash;&gt;-->
+<!--                    <encoding>UTF-8</encoding>&lt;!&ndash; utf-8进行编码代码 &ndash;&gt;-->
+<!--                    <docencoding>UTF-8</docencoding>&lt;!&ndash; utf-8进行编码文档 &ndash;&gt;-->
+<!--                </configuration>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>attach-javadocs</id>-->
+<!--                        <goals>-->
+<!--                            <goal>jar</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            &lt;!&ndash;公钥私钥插件，也就是上传需要进行验证用户名和密码过程中需要用到的插件&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.apache.maven.plugins</groupId>-->
+<!--                <artifactId>maven-gpg-plugin</artifactId>-->
+<!--                <version>1.5</version>-->
+<!--                <executions>-->
+<!--                    <execution>-->
+<!--                        <id>sign-artifacts</id>-->
+<!--                        <phase>verify</phase>-->
+<!--                        <goals>-->
+<!--                            <goal>sign</goal>-->
+<!--                        </goals>-->
+<!--                    </execution>-->
+<!--                </executions>-->
+<!--            </plugin>-->
+<!--            &lt;!&ndash;部署插件&ndash;&gt;-->
+<!--            <plugin>-->
+<!--                <groupId>org.sonatype.plugins</groupId>-->
+<!--                <artifactId>nexus-staging-maven-plugin</artifactId>-->
+<!--                <version>1.6.7</version>-->
+<!--                <extensions>true</extensions>-->
+<!--                <configuration>-->
+<!--                    <serverId>${serverId}</serverId>-->
+<!--                    <nexusUrl>https://s01.oss.sonatype.org/</nexusUrl>-->
+<!--                    <autoReleaseAfterClose>true</autoReleaseAfterClose>-->
+<!--                </configuration>-->
+<!--            </plugin>-->
+<!--        </plugins>-->
+<!--    </build>-->
 
 </project>

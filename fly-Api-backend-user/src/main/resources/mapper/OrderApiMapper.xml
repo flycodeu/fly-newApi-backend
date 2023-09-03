@@ -5,24 +5,25 @@
 <mapper namespace="com.fly.mapper.OrderApiMapper">
 
     <resultMap id="BaseResultMap" type="com.flyCommon.model.entity.OrderApi">
-            <id property="id" column="id" jdbcType="INTEGER"/>
-            <result property="userId" column="userId" jdbcType="INTEGER"/>
-            <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="INTEGER"/>
-            <result property="totalMoney" column="totalMoney" jdbcType="DOUBLE"/>
-            <result property="price" column="price" jdbcType="DOUBLE"/>
-            <result property="buyCount" column="buyCount" jdbcType="BIGINT"/>
-            <result property="status" column="status" jdbcType="TINYINT"/>
-            <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
-            <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
-            <result property="orderSn" column="orderSn" jdbcType="VARCHAR"/>
-            <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
-             <result property="delayTime" column="delayTime" jdbcType="TIMESTAMP"/>
+        <id property="id" column="id" jdbcType="INTEGER"/>
+        <result property="userId" column="userId" jdbcType="INTEGER"/>
+        <result property="interfaceInfoId" column="interfaceInfoId" jdbcType="INTEGER"/>
+        <result property="totalMoney" column="totalMoney" jdbcType="DOUBLE"/>
+        <result property="price" column="price" jdbcType="DOUBLE"/>
+        <result property="buyCount" column="buyCount" jdbcType="BIGINT"/>
+        <result property="status" column="status" jdbcType="TINYINT"/>
+        <result property="createTime" column="createTime" jdbcType="TIMESTAMP"/>
+        <result property="isDelete" column="isDelete" jdbcType="TINYINT"/>
+        <result property="orderSn" column="orderSn" jdbcType="VARCHAR"/>
+        <result property="updateTime" column="updateTime" jdbcType="TIMESTAMP"/>
+        <result property="delayTime" column="delayTime" jdbcType="TIMESTAMP"/>
+        <result property="alipayTradeNo" column="alipayTradeNo" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
         id,userId,interfaceInfoId,
         totalMoney,price,buyCount,
         status,createTime,isDelete,
-        orderSn,updateTime,delayTime
+        orderSn,updateTime,delayTime,alipayTradeNo
     </sql>
 </mapper>

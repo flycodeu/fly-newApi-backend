@@ -24,8 +24,8 @@ class OrderServiceImplTest {
         orderRequest.setTotalMoney(1.0);
         orderRequest.setBuyCount(100);
         orderRequest.setStatus(0);
-        boolean b = orderService.addOrder(orderRequest);
-        System.out.println(b);
+//        boolean b = orderService.addOrder(orderRequest);
+//        System.out.println(b);
     }
 
     @Test

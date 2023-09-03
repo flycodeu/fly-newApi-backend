@@ -9,13 +9,11 @@ import com.fly.mapper.OrderApiMapper;
 import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.entity.OrderApi;
 import com.flyCommon.model.entity.User;
-import com.flyCommon.model.entity.UserInterfaceInfo;
 import com.flyCommon.model.request.Order.OrderRequest;
 import org.springframework.beans.BeanUtils;
 import org.springframework.stereotype.Service;
 
 import javax.annotation.Resource;
-import java.math.BigInteger;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.List;
@@ -35,6 +33,7 @@ public class OrderApiServiceImpl extends ServiceImpl<OrderApiMapper, OrderApi>
     @Resource
     private UserInterfaceInfoServiceImpl userInterfaceInfoService;
 
+
     @Override
     public boolean addOrder(OrderRequest orderRequest) {
         if (orderRequest == null || orderRequest.getUserId() == null || orderRequest.getInterfaceInfoId() == null || orderRequest.getBuyCount() == null) {
@@ -48,6 +47,8 @@ public class OrderApiServiceImpl extends ServiceImpl<OrderApiMapper, OrderApi>
         if (interfaceInfo == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR);
         }
+
+
 
         double infoPrice = interfaceInfo.getPrice();
 
@@ -76,19 +77,19 @@ public class OrderApiServiceImpl extends ServiceImpl<OrderApiMapper, OrderApi>
         BeanUtils.copyProperties(orderRequest, order);
         order.setTotalMoney(totalMoney);
         order.setPrice(infoPrice);
-        order.setStatus(1);
         order.setDelayTime(newTime);
 
         order.setOrderSn(orderRequest.getUserId() + orderRequest.getInterfaceInfoId() + "" + System.currentTimeMillis());
 
+        // todo 使用消息队列
         synchronized (order.getUserId()) {
-            UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
-            QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
-            queryWrapper.eq("userId",orderRequest.getUserId());
-            queryWrapper.eq("interfaceInfoId",orderRequest.getInterfaceInfoId());
-            userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper);
-            userInterfaceInfo.setLeftNum(userInterfaceInfo.getLeftNum()+buyCount);
-            userInterfaceInfoService.updateById(userInterfaceInfo);
+//            UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+//            QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();
+//            queryWrapper.eq("userId",orderRequest.getUserId());
+//            queryWrapper.eq("interfaceInfoId",orderRequest.getInterfaceInfoId());
+//            userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper);
+//            userInterfaceInfo.setLeftNum(userInterfaceInfo.getLeftNum()+buyCount);
+//            userInterfaceInfoService.updateById(userInterfaceInfo);
 
             // 判断余额是否充足
             boolean save = this.save(order);
@@ -96,8 +97,10 @@ public class OrderApiServiceImpl extends ServiceImpl<OrderApiMapper, OrderApi>
                 throw new BusinessException(ErrorCode.SYSTEM_ERROR, "购买失败");
             }
         }
+//        orderMessageProducer.sendMessage(order.getId() + "," + buyCount + "," + orderRequest.getUserId() + "," + orderRequest.getInterfaceInfoId());
         return true;
     }
+
 
     @Override
     public OrderApi getOrderById(Long id) {
@@ -130,6 +133,7 @@ public class OrderApiServiceImpl extends ServiceImpl<OrderApiMapper, OrderApi>
         }
         QueryWrapper<OrderApi> queryWrapper = new QueryWrapper<>();
         queryWrapper.eq("userId", userId);
+        queryWrapper.orderByDesc("createTime");
         return this.list(queryWrapper);
     }
 

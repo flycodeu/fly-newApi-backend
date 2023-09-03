@@ -10,7 +10,10 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.fly.alipay.AliPay;
 import com.fly.alipay.AliPayConfig;
 import com.fly.mapper.OrderApiMapper;
+import com.fly.service.impl.UserInterfaceInfoServiceImpl;
 import com.flyCommon.model.entity.OrderApi;
+import com.flyCommon.model.entity.UserInterfaceInfo;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -23,6 +26,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @RestController
 @RequestMapping( "/alipay" )
 public class AliPayController {
@@ -40,15 +44,22 @@ public class AliPayController {
     @Resource
     private OrderApiMapper ordersMapper;
 
+    @Resource
+    private UserInterfaceInfoServiceImpl userInterfaceInfoService;
+
     @GetMapping( "/pay" ) // &subject=xxx&traceNo=xxx&totalAmount=xxx
-    public void pay(AliPay aliPay, HttpServletResponse httpResponse) throws Exception {
+    public synchronized void pay(AliPay aliPay, HttpServletResponse httpResponse) throws Exception {
         // 1. 创建Client，通用SDK提供的Client，负责调用支付宝的API
         AlipayClient alipayClient = new DefaultAlipayClient(GATEWAY_URL, aliPayConfig.getAppId(),
                 aliPayConfig.getAppPrivateKey(), FORMAT, CHARSET, aliPayConfig.getAlipayPublicKey(), SIGN_TYPE);
 
+
+        log.info("url:  " + aliPayConfig.getNotifyUrl());
         // 2. 创建 Request并设置Request参数
         AlipayTradePagePayRequest request = new AlipayTradePagePayRequest();  // 发送请求的 Request类
         request.setNotifyUrl(aliPayConfig.getNotifyUrl());
+        request.setReturnUrl(aliPayConfig.getReturnUrl());
+
         JSONObject bizContent = new JSONObject();
         bizContent.set("out_trade_no", aliPay.getTraceNo());  // 我们自己生成的订单编号
         bizContent.set("total_amount", aliPay.getTotalAmount()); // 订单的总金额
@@ -69,11 +80,11 @@ public class AliPayController {
         httpResponse.getWriter().close();
     }
 
+
     @PostMapping( "/notify" )  // 注意这里必须是POST接口
     public String payNotify(HttpServletRequest request) throws Exception {
         if (request.getParameter("trade_status").equals("TRADE_SUCCESS")) {
-            System.out.println("=========支付宝异步回调========");
-
+            log.info("=========支付宝异步回调========");
             Map<String, String> params = new HashMap<>();
             Map<String, String[]> requestParams = request.getParameterMap();
             for (String name : requestParams.keySet()) {
@@ -91,24 +102,36 @@ public class AliPayController {
             // 支付宝验签
             if (checkSignature) {
                 // 验签通过
-                System.out.println("交易名称: " + params.get("subject"));
-                System.out.println("交易状态: " + params.get("trade_status"));
-                System.out.println("支付宝交易凭证号: " + params.get("trade_no"));
-                System.out.println("商户订单号: " + params.get("out_trade_no"));
-                System.out.println("交易金额: " + params.get("total_amount"));
-                System.out.println("买家在支付宝唯一id: " + params.get("buyer_id"));
-                System.out.println("买家付款时间: " + params.get("gmt_payment"));
-                System.out.println("买家付款金额: " + params.get("buyer_pay_amount"));
+                log.info("交易名称: " + params.get("subject"));
+                log.info("交易状态: " + params.get("trade_status"));
+                log.info("支付宝交易凭证号: " + params.get("trade_no"));
+                log.info("商户订单号: " + params.get("out_trade_no"));
+                log.info("交易金额: " + params.get("total_amount"));
+                log.info("买家在支付宝唯一id: " + params.get("buyer_id"));
+                log.info("买家付款时间: " + params.get("gmt_payment"));
+                log.info("买家付款金额: " + params.get("buyer_pay_amount"));
 
                 // 查询订单
                 QueryWrapper<OrderApi> queryWrapper = new QueryWrapper<>();
                 queryWrapper.eq("orderSn", outTradeNo);
                 OrderApi orders = ordersMapper.selectOne(queryWrapper);
                 if (orders != null) {
-                    orders.setOrderSn(alipayTradeNo);
-                    orders.setCreateTime(new Date());
+                    Integer interfaceInfoId = orders.getInterfaceInfoId();
+                    Integer userId = orders.getUserId();
+                    Integer buyCount = orders.getBuyCount();
+
+                    orders.setAlipayTradeNo(alipayTradeNo);
+                    orders.setUpdateTime(new Date());
                     orders.setStatus(1);
                     ordersMapper.updateById(orders);
+
+                    UserInterfaceInfo userInterfaceInfo = new UserInterfaceInfo();
+                    QueryWrapper<UserInterfaceInfo> queryWrapper2 = new QueryWrapper<>();
+                    queryWrapper2.eq("userId", userId);
+                    queryWrapper2.eq("interfaceInfoId", interfaceInfoId);
+                    userInterfaceInfo = userInterfaceInfoService.getOne(queryWrapper2);
+                    userInterfaceInfo.setLeftNum(userInterfaceInfo.getLeftNum() + buyCount);
+                    userInterfaceInfoService.updateById(userInterfaceInfo);
                 }
             }
         }

@@ -121,6 +121,11 @@
 <!--            <version>0.0.1</version>-->
 <!--        </dependency>-->
 
+        <dependency>
+            <groupId>io.github.flybase1</groupId>
+            <artifactId>fly-Api-stater</artifactId>
+            <version>0.0.2</version>
+        </dependency>
 
         <!--dubbo和nacos-->
         <dependency>
@@ -152,12 +157,12 @@
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
-        <!--sdk-->
-        <dependency>
-            <groupId>com.fly.sdk</groupId>
-            <artifactId>fly-Api-stater</artifactId>
-            <version>0.0.1-test</version>
-        </dependency>
+<!--        &lt;!&ndash;sdk&ndash;&gt;-->
+<!--        <dependency>-->
+<!--            <groupId>com.fly.sdk</groupId>-->
+<!--            <artifactId>fly-Api-stater</artifactId>-->
+<!--            <version>0.0.1-test</version>-->
+<!--        </dependency>-->
 
             <!--阿里支付沙盒-->
         <dependency>
@@ -166,6 +171,19 @@
             <version>4.22.110.ALL</version>
         </dependency>
 
+        <!--rabbitmq-->
+        <dependency>
+            <groupId>com.rabbitmq</groupId>
+            <artifactId>amqp-client</artifactId>
+            <version>5.18.0</version>
+        </dependency>
+
+        <!--spring-rabbitmq-->
+<!--        <dependency>-->
+<!--            <groupId>org.springframework.boot</groupId>-->
+<!--            <artifactId>spring-boot-starter-amqp</artifactId>-->
+<!--            <version>2.7.2</version>-->
+<!--        </dependency>-->
     </dependencies>
 
     <build>

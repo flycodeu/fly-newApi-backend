@@ -1,6 +1,8 @@
 package com.fly.service.impl;
 
 import cn.hutool.http.HttpUtil;
+import cn.hutool.json.JSON;
+import cn.hutool.json.JSONObject;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
@@ -36,6 +38,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ThreadPoolExecutor;
 import java.util.regex.Pattern;
 
 /**
@@ -55,6 +59,8 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
     private FlyApiClient flyApiClient;
     @Resource
     private RedisTemplate<String, Object> redisTemplate;
+    @Resource
+    private ThreadPoolExecutor threadPoolExecutor;
 
     @Override
     public Long addInterfaceInfo(InterfaceInfoAddRequest interfaceInfoAddRequest) {
@@ -408,15 +414,11 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
 
         String accessKey = user.getAccessKey();
         String secretKey = user.getSecretKey();
-//        FlyApiClient flyApiClient2 = new FlyApiClient(accessKey, secretKey);
-//
-//        Gson gson = new Gson();
-//        com.flySdk.model.User fromJson = gson.fromJson(requestParams, com.flySdk.model.User.class);
-
 
         Object res = invokeInterfaceInfo(interfaceInfoNew.getSdkPath(), interfaceInfoNew.getMethodName(), requestParams, accessKey, secretKey);
 
 //        return flyApiClient2.getNameByPostJson(fromJson);
+
         if (res == null) {
             res = "请求接口存在问题，稍后再试";
         }
@@ -512,7 +514,6 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         }
         return false;
     }
-
 
 
 }

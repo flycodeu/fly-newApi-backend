@@ -148,6 +148,9 @@ public class UserServiceImpl extends ServiceImpl<UserMapper, User>
     @Override
     public String userLoginByPhone(LoginPhoneVo loginPhoneVo) {
         String phoneNum = loginPhoneVo.getPhoneNum();
+        // 限流
+        redisLimiterManager.doRateLimit(phoneNum);
+
         if (RegexUtils.isPhoneInvalid(phoneNum)) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "输入的手机号不正确");
         }
