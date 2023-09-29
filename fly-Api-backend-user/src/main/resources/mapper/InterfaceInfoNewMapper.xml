@@ -21,6 +21,7 @@
         <result property="isDeleted" column="isDeleted" jdbcType="TINYINT"/>
         <result property="requestParams" column="requestParams" jdbcType="VARCHAR"/>
         <result property="invokeCount" column="invokeCount" jdbcType="TINYINT"/>
+        <result property="avatarUrl" column="avatarUrl" jdbcType="VARCHAR"/>
     </resultMap>
 
     <sql id="Base_Column_List">
@@ -28,6 +29,6 @@
         port,IPAddress,url,
         requestHeader,responseHeader,status,
         method,userId,createTime,
-        updateTime,isDeleted,requestParams
+        updateTime,isDeleted,requestParams,avatarUrl
     </sql>
 </mapper>

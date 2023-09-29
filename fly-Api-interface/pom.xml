@@ -41,17 +41,22 @@
             <optional>true</optional>
         </dependency>
         <!--工具类-->
-        <dependency>
-            <groupId>cn.hutool</groupId>
-            <artifactId>hutool-all</artifactId>
-            <version>5.8.18</version>
-        </dependency>
         <!--fly api stater-->
+<!--        <dependency>-->
+<!--            <groupId>io.github.flybase1</groupId>-->
+<!--            <artifactId>flyapi-client-sdk</artifactId>-->
+<!--            <version>1.0.0.Release</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.fly.sdk</groupId>
-            <artifactId>fly-Api-stater</artifactId>
-            <version>0.0.1-test</version>
+            <groupId>io.github.flybase1</groupId>
+            <artifactId>flyapi-client-sdk</artifactId>
+            <version>0.0.5</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.fly.sdk</groupId>-->
+<!--            <artifactId>fly-Api-stater</artifactId>-->
+<!--            <version>0.0.1-test</version>-->
+<!--        </dependency>-->
         <!--工具包-->
         <dependency>
             <groupId>cn.hutool</groupId>

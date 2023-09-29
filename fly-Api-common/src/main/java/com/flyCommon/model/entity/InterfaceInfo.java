@@ -16,6 +16,8 @@ import java.util.Date;
 @TableName(value ="interface_info")
 @Data
 public class InterfaceInfo implements Serializable {
+
+
     /**
      * 主键
      */
@@ -82,8 +84,7 @@ public class InterfaceInfo implements Serializable {
      */
     private String requestParams;
 
-    @TableField(exist = false)
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = -1800944560814670304L;
 
     @Override
     public boolean equals(Object that) {

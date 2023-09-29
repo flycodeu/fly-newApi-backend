@@ -10,20 +10,20 @@ import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import com.fly.constant.CommonConstant;
 import com.fly.constant.UserConstant;
 import com.fly.exception.BusinessException;
+import com.fly.flyapiclientsdk.client.FlyApiClient;
 import com.fly.mapper.InterfaceInfoMapper;
 import com.fly.service.InterfaceInfoService;
 import com.fly.service.UserService;
-import com.flyCommon.model.entity.UserInterfaceInfo;
+
 import com.flyCommon.model.request.Interface.*;
-import com.flyCommon.model.request.UserInterface.UserInterfaceInfoCanAccess;
-import com.flySdk.client.FlyApiClient;
+
 import com.fly.common.ErrorCode;
 import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.enums.InterfaceInfoStatusEnum;
 import com.flyCommon.model.request.DeleteRequest;
 import com.flyCommon.model.request.IdRequest;
 import com.flyCommon.model.vo.UserVO;
-import com.fly.utils.ThrowUtils;
+
 import com.google.gson.Gson;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
@@ -415,8 +415,12 @@ public class InterfaceInfoServiceImpl extends ServiceImpl<InterfaceInfoMapper, I
         String accessKey = user.getAccessKey();
         String secretKey = user.getSecretKey();
 
-        Object res = invokeInterfaceInfo(interfaceInfoNew.getSdkPath(), interfaceInfoNew.getMethodName(), requestParams, accessKey, secretKey);
-
+        Object res = null;
+        if (interfaceInfoNew.getMethod().equals("post") && requestParams != null) {
+            res = invokeInterfaceInfo(interfaceInfoNew.getSdkPath(), interfaceInfoNew.getMethodName(), requestParams, accessKey, secretKey);
+        } else {
+            throw new BusinessException(ErrorCode.PARAMS_ERROR, "缺少参数");
+        }
 //        return flyApiClient2.getNameByPostJson(fromJson);
 
         if (res == null) {

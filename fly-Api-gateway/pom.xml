@@ -43,11 +43,21 @@
             <groupId>org.springframework.cloud</groupId>
             <artifactId>spring-cloud-starter-circuitbreaker-reactor-resilience4j</artifactId>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>com.fly.sdk</groupId>-->
+<!--            <artifactId>fly-Api-stater</artifactId>-->
+<!--            <version>0.0.1-test</version>-->
+<!--        </dependency>-->
         <dependency>
-            <groupId>com.fly.sdk</groupId>
-            <artifactId>fly-Api-stater</artifactId>
-            <version>0.0.1-test</version>
+            <groupId>io.github.flybase1</groupId>
+            <artifactId>flyapi-client-sdk</artifactId>
+            <version>0.0.5</version>
         </dependency>
+<!--        <dependency>-->
+<!--            <groupId>io.github.flybase1</groupId>-->
+<!--            <artifactId>flyapi-client-sdk</artifactId>-->
+<!--            <version>1.0.0.Release</version>-->
+<!--        </dependency>-->
         <!--dubbo+nacos-->
         <dependency>
             <groupId>com.alibaba.nacos</groupId>

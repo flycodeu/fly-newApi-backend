@@ -21,6 +21,7 @@ import static com.flySdk.Utils.SignUtils.genSign;
  * @author fly
  */
 public class FlyApiClient {
+    // ip 39.104.23.173
     private static final String HTTP_URL = "http://localhost:7550/api";
     private final String accessKey;
     private final String secretKey;

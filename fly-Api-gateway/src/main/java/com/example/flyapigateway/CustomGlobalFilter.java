@@ -1,13 +1,14 @@
 package com.example.flyapigateway;
 
+import com.fly.flyapiclientsdk.utils.SignUtils;
 import com.flyCommon.common.ErrorCode;
 import com.flyCommon.exception.BusinessException;
 import com.flyCommon.model.entity.InterfaceInfoNew;
 import com.flyCommon.model.entity.User;
 import com.flyCommon.service.InnerInterfaceInfoNewService;
 import com.flyCommon.service.InnerUserInterfaceInfoService;
+
 import com.flyCommon.service.InnerUserService;
-import com.flySdk.Utils.SignUtils;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.dubbo.config.annotation.DubboReference;
 import org.reactivestreams.Publisher;
@@ -45,7 +46,7 @@ import java.util.Objects;
 @Slf4j
 public class CustomGlobalFilter implements GlobalFilter, Ordered {
     // 白名单
-    public static final List<String> WHIT_LIST = Arrays.asList("127.0.0.1", "localhost", "0:0:0:0:0:0:0:1");
+    public static final List<String> WHIT_LIST = Arrays.asList("127.0.0.1", "localhost", "0:0:0:0:0:0:0:1","39.104.23.173","172.17.10.210");
     public static final Long FIVE_MINUTES = 60 * 5L;
     @DubboReference
     private InnerUserService innerUserService;
@@ -54,7 +55,8 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
     @DubboReference
     private InnerInterfaceInfoNewService innerInterfaceInfoNewService;
 
-    private static final List<String> INTERFACE_HOST = Arrays.asList("http://localhost:7550");
+    // ip 39.104.23.173
+    private static final List<String> INTERFACE_HOST = Arrays.asList("http://localhost:7530","http://39.104.23.173:7530");
 
     /**
      * @param exchange 响应交互
@@ -122,7 +124,7 @@ public class CustomGlobalFilter implements GlobalFilter, Ordered {
         // 4. todo 校验body,实际请求是从数据库获取的
         String secretKey = invokeUserAkSkValid.getSecretKey();
 //        "b55db76db7b87adac5df9215dc0afcb8"
-        String signServer = SignUtils.genSign(body, secretKey);
+        String signServer = SignUtils.getSign(body, secretKey);
         if (!Objects.equals(sign, signServer)) {
             log.error("sign error");
             return handlerNoAuth(response);

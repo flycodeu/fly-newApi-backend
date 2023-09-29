@@ -112,6 +112,11 @@ public class InterfaceInfoNew implements Serializable {
      */
     private String sdkPath;
 
+    /**
+     * 接口头像
+     */
+    private String avatarUrl;
+
 
     @TableField(exist = false)
     private static final long serialVersionUID = 1L;

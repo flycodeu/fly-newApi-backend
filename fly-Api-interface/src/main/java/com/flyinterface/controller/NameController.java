@@ -1,8 +1,8 @@
 package com.flyinterface.controller;
 
 
-import com.flySdk.Utils.SignUtils;
-import com.flySdk.model.User;
+
+import com.fly.flyapiclientsdk.model.User;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
@@ -52,7 +52,7 @@ public class NameController {
 //            throw new RuntimeException("signError");
 //        }
 
-        String result = "Post your name=>" + user.getName();
+        String result = "Post your name=>" + user.getUsername();
         // todo 调用次数+1
 
         return result;

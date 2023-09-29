@@ -1,55 +1,24 @@
 spring:
   application:
     name: flyapi-backend
-  # DataSource Config
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/flyapi
+    url: jdbc:mysql://localhost/flyapi
     username: root
     password: root
   mvc:
     pathmatch:
       matching-strategy: ANT_PATH_MATCHER
-  # session
+    # session 失效时间（分钟）
   session:
     timeout: 86400
     store-type: redis
-  # redis
+    # redis 配置
   redis:
     port: 6379
-    host: localhost
-    database: 3
-  mail:
-    host: smtp.qq.com
-    port: 25
-    username: flycodeu@qq.com
-    password: bcvbqwtpurzlddgj
-#  rabbitmq:
-#    port:  5672
-#    host: localhost
-#    username: guest
-#    password: guest
-
-
-server:
-  port: 7529
-  servlet:
-    context-path: /api
-mybatis-plus:
-  configuration:
-    map-underscore-to-camel-case: false
-    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-  global-config:
-    db-config:
-      logic-delete-field: isDelete #
-      logic-delete-value: 1 #
-      logic-not-delete-value: 0 #
-
-#flyapi:
-#  client:
-#    access-key: 9e44946a265c996e05f6fad5bab87249
-#    secret-key: 4440120741c2ba54361754056a1c134e
-
+    host: 127.0.0.1
+    password:
+    database: 0
 
 dubbo:
   application:
@@ -61,16 +30,36 @@ dubbo:
     id: nacos-registry
     address: nacos://localhost:8848
 
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: false
+    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+  global-config:
+    db-config:
+      logic-delete-field: isDelete # 全局逻辑删除的实体字段名(since 3.3.0,配置后可以忽略不配置步骤2)
+      logic-delete-value: 1 # 逻辑已删除值(默认为 1)
+      logic-not-delete-value: 0 # 逻辑未删除值(默认为 0)
 flyapi:
   client:
-    assess-key: ef0d10633892b45daec60881f8f86c42
-    secret-key: b61ac354d62dd873b60e8b39b1505000
+    access-key: 9e44946a265c996e05f6fad5bab87249
+    secret-key: 4440120741c2ba54361754056a1c134e
+
+server:
+  address: 0.0.0.0
+  port: 7529
+  servlet:
+    context-path: /api
+    # cookie 30 天过期
+    session:
+      cookie:
+        max-age: 2592000
+        # 47.113.144.50
+        # domain: flycode.icu
 
 
 alipay:
   appId: 9021000126620180
-  notifyUrl:   http://kedbib.natappfree.cc/api/alipay/notify
+  notifyUrl:  http://dnsjnn.natappfree.cc/api/alipay/notify
   alipayPublicKey: MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA+7bCLCx4gQt9+sskYxH1+qFKB2UnFRq+5zU+p1LEGLcL+v1vPVUljD+5ZZz/pUYN8qDB2NCHjYUru83T7zeAVN9OnFOejH5BhxJONQESSwI7Cc0aQ0Nj7F3tCyyhVfvPQVmB4pQH04h5SNCk/WLh1DyLk+jYaM4VHt9LPVrZAdPOJ8mU6tUcuUbRdqsUOqcNeDhdBnSc5TggEsqNJqeyzww7Blts8nUuD5T2zgZjWoJI12O30NqnJjikwv6oYh0hWHoarwd6DtYjKLewpfvGltLF68qOfOP9crK5+NlVONmUukSNgocOUcqor/0bcn8SJ30QzLr/eKq3I4P7bB24rwIDAQAB
   appPrivateKey: MIIEvwIBADANBgkqhkiG9w0BAQEFAASCBKkwggSlAgEAAoIBAQDfxA9HSxEzTMFX5BTI7wdZPh3Td9sYJ6CRCO3ZhCYbR6s1UQHyeHVhKN4NCn7B2VPvGUYLlXFIcP4HWolwdKxevkfULiWNKW10n61UXbmmvx/6dbc6AXJ73ptFpX+GAYBCkVA9GEPlXJkf29YzWVgBlLdh7JcbZam8QLt55nNSr3q6W7XAZWboJSTHzJnYN0k1sMwB1DGW9O/LXPLRo/DTqlgmDhkQvp5us1Q46c+cvEQU1KXtlxJTs4rM4ZK20/krDPwGlZOtahce0F0FsMlJ3TT5YChBxnSoXi7/0tBwW2eIB+DquQEOjXY3nBP+UX3xn2wwGcObFXvA6APXW+GvAgMBAAECggEBALcu1t8jWgJoHIOqKUXRQG/ThTFAFnFwx2bUK3r9TwDYLBWqqnBoIpeWkCmW5Owm0SqUwx3qimGmdp9og8k3CoFJPp455O3p8zwdGBVP4RLbtf8g7Q2kb6duNijO8lWu1uQn98r8GWEj7AsDuhgxVPV+XJ3ixFVeZZTCXXfOq6wMietDDewLk7UrKU7vr5GHd+71p0absiHCVwXvV9a42TwGXF3kpMvaYLjQ7KVL5gbfQTm5tT5kBrw6Vo/X8Hi2WJQ9SP0ykt2qvhIdZtAlyEKOSv8y5a4+IIqYbP0z/2RwYug57K3k/2t98b/tO6kJ32oljv2PiJ7AuaiiJCV7woECgYEA9U/QNRfmFop62iwRfAW+hm97b1V61UMusgjMcy5zDAw1C8wvZo2FNhYKh6UQRN9RRzD99x350Qn70NKAZtXOAyH/b2ZGpMtwrNWX6FfALPDHx0FqmThBEMswvK0iWQ4RaFUUN1K5MWNpTSX53HlXjJFhbOBj0mv2fUJN+Uupoe8CgYEA6YPs0qSbKXvGRQtQeCM4kkOrZ6zdUeYwI1CKga3se9ahBLMmoCYxIr4MLevlqjz639YAV/oxztmXCZJni3Nb5BxK5rTgPKm/c4d8xVSxtvA5wbq8nYN0dPAhYZh6fzd/oyb/8yJaTX4jhRbjItyqdx0Z9jE7bRr6hKj73UjGfEECgYEA82JSkrq5X9fY96kNV91jIIJvFxDaI8jaBW1RW13UazmZT7EvvjHe3sCThe0w7QQb4eQrtQgamVmsa4zONDkggl8yzVXN9SabDf+FDdIyKuRhccHnf0ke1QijvC6Si4S3pKn0usbqUqPtD8wD0MjbIe4DmUAwCc9v6Orl7dcx4CUCgYEA3TDHnOeqyeqibjg/au0B4xoSPEw0ACXopyrdZ+TVQqCVORxxk/VZSa13X/A5Rb4pbOkKvksR7vuQ49I4HpGRE0vxbwMZ/JxV6xsFhu2owL5gFy/JBfLE1xe2pvmF3wc08dg5TZbWrtyyzJhXYmhfWCDKvLb5sWmCrzJaEMukp4ECgYAZdNqmriZcCM7e0CvYvnPuFWwaHRHl9mLEIHOjDNNg5ILZNu7e5HlseIqiOA/17msFeHo2GtldbiW6toFU0VcmSTp+bsPm+ltN0OjEWXK5225ZBeD7rStAzWz1uIdGdgWWY3sWkhaIh8kCC/CqyCWg+FYNU+NiWALqI+/Vx8T2Ow==
   returnUrl: http://localhost:8000/myOrderList
-

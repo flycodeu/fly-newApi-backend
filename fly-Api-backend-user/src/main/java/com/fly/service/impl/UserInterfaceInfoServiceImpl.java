@@ -238,7 +238,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
 
 
     @Override
-    public Boolean invokeCount(Long interfaceInfoId, Long userId) {
+    public synchronized Boolean invokeCount(Long interfaceInfoId, Long userId) {
         if (interfaceInfoId == null || userId == null) {
             throw new BusinessException(ErrorCode.PARAMS_ERROR, "请求为空");
         }
@@ -263,6 +263,7 @@ public class UserInterfaceInfoServiceImpl extends ServiceImpl<UserInterfaceInfoM
         if (userInterfaceInfoCount == null) {
             throw new BusinessException(ErrorCode.SYSTEM_ERROR);
         }
+
         Long userId = userInterfaceInfoCount.getUserId();
         Long interfaceInfoId = userInterfaceInfoCount.getInterfaceInfoId();
         QueryWrapper<UserInterfaceInfo> queryWrapper = new QueryWrapper<>();

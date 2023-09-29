@@ -78,6 +78,8 @@ public class InterfaceInfoUpdateRequest implements Serializable {
      */
     private String sdkPath;
 
+    private String avatarUrl;
+
 
     private static final long serialVersionUID = 1L;
 }
