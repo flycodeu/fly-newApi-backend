@@ -1,4 +1,4 @@
-![image](https://github.com/flybase1/fly-newApi-backend/assets/89577685/19b99a43-9670-4b09-acd4-ea811691435a)<h1 align="center">飞云API接口开放平台</h1>
+<h1 align="center">飞云API接口开放平台</h1>
 <p align="center"><strong>飞云API接口开放平台是一个为用户和开发者提供全面API接口调用服务的平台 🛠</strong></p>
 <div align="center">
 <a target="_blank" href="https://github.com/qimu666/qi-api">
@@ -11,9 +11,6 @@
         <img alt="" src="https://img.shields.io/badge/JDK-1.8+-green.svg"/>
 </a>
     <img alt="SpringBoot" src="https://raster.shields.io/badge/SpringBoot-2.7+-green.svg"/>
-<a href="https://github.com/qimu666/qi-api" target="_blank">
-    <img src='https://github.com/flybase1/fly-newApi-backend' alt='GitHub forks' class="no-zoom">
-</a>
 <a href="https://github.com/flybase1/fly-newApi-backend" target="_blank"><img src='https://github.com/flybase1/fly-newApi-backend' alt='GitHub stars' class="no-zoom">
 </a>
 </div>
