@@ -25,7 +25,7 @@
 | ------------------------------------------------------------ | ------------------ |
 | **🏘️ [fly-Api-backend-user](./fly-Api-backend-user)**         |飞云API后端服务模块 |
 | **🏘️ [fly-Api-common](./fly-Api-common)**                     | 公共服务模块       |
-| **🕸️ [qi-api-gateway](./fly-Api-gateway)**                    | 网关模块           |
+| **🕸️ [fly-Api-gateway](./fly-Api-gateway)**                    | 网关模块           |
 | **🔗 [fly-Api-interface](./fly-Api-interface)**               | 接口模块           |
 | **🛠 [飞云SDK]([https://github.com/qimu666/qi-api-sdk](https://github.com/flybase1/flyapi-client-sdk))**    | 开发者调用sdk      |
 
